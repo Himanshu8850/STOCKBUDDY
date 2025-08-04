@@ -1,16 +1,27 @@
-import { useContext, useEffect } from "react";
-import { React, useState } from "react";
+import { useContext, useEffect, useState, React } from "react"; // Added React import if not globally available
 import { MyContext } from "./context";
 import { fetchShares } from "./functions";
+
 const Stocks = () => {
   const { load, shares, setport, setShares, update, setupdate } =
     useContext(MyContext);
   const [disabled, setDisabled] = useState(false);
 
-  const sell = async (index, profit) => {
+  // Define colors that align with the new dark theme
+  // These should match the CSS variables you defined or be close approximations
+  const BG_DARK_BLUE = "#1A1A32";
+  const ACCENT_VIBRANT_BLUE = "#4A6BF7";
+  const ACCENT_ELECTRIC_PINK = "#F72C6A";
+  const TEXT_WHITE = "#FFFFFF";
+  const CARD_BACKGROUND = "#25254A";
+  const PROFIT_BACKGROUND = "#28A745"; // Darker green for profit state
+  const LOSS_BACKGROUND = "#DC3545"; // Darker red for loss state
+
+  const sell = async (symbol, profit) => {
+    // Changed 'index' to 'symbol' for clarity, assuming index is the symbol
     setDisabled(true);
     const res = await fetch(
-      `http://localhost:5000/api/sell?symbol=${index}&profit=${profit}`,
+      `http://localhost:5000/api/sell?symbol=${symbol}&profit=${profit}`,
       {
         method: "DELETE",
         headers: {
@@ -21,128 +32,126 @@ const Stocks = () => {
 
     const updatedShares = () => {
       setupdate(true);
-      localStorage.setItem(
-        "shares",
-        JSON.stringify(shares.filter((share) => share.symbol !== index))
-      );
-      setShares(
-        JSON.stringify(shares.filter((share) => share.symbol !== index))
-      );
-      fetchShares();
+      // Ensure 'shares' is an array before filtering
+      const filteredShares = Array.isArray(shares)
+        ? shares.filter((share) => share.symbol !== symbol)
+        : [];
+
+      localStorage.setItem("shares", JSON.stringify(filteredShares));
+      setShares(filteredShares); // Pass the filtered array directly
+      // fetchShares(); // This might cause an infinite loop or unexpected behavior if not carefully managed
+      // If fetchShares updates shares state, it might conflict with immediate setShares.
+      // Consider if you really need to refetch ALL shares immediately after a single sell.
       setDisabled(false);
       setupdate(false);
     };
     updatedShares();
-    // console.log(updatedshares);
-
-    // console.log(res.json());
+    // console.log(res.json()); // This would log a Promise, not the resolved JSON.
   };
-  // Example of data initialization
-  const [stocks, setStocks] = useState([]);
 
-  // useEffect(() => {
-  //   fetchData().then((data) => setStocks(data));
-  // }, []);
-  // useEffect(() => {
-  //   let sh = "";
-  //   const shj = () => {
-  //     while (sh == "") sh = localStorage.getItem("shares");
-  //     setShares(sh);
-  //   };
-  //   shj();
-  //   console.log(sh);
-  // }, []);
   const portchange = () => {
     setport(false);
   };
+
   return (
     <div>
       <div
         style={{
           display: "flex",
           justifyContent: "space-around",
-          backgroundColor: "rgb(150, 255, 150)",
+          backgroundColor: CARD_BACKGROUND, // Changed to a color from the new theme
           width: "100vw",
           position: "relative",
           zIndex: "0",
-          // margin: "10px 0 0 0",
         }}
       >
         <h2
           style={{
-            // marginTop: "40px",
-            // marginBottom: "40px",
-            backgroundColor: "rgb(90, 255, 90)",
+            backgroundColor: CARD_BACKGROUND, // Changed to a color from the new theme
             fontSize: "35px",
             width: "300px",
             marginTop: 20,
+            color: TEXT_WHITE, // Changed text color to white
           }}
         >
           MY SHARES
         </h2>
         <button
-          className="button-52 hb"
+          className="button-52 hb" // `hb` class already has the blue background from CSS
           onClick={portchange}
-          style={{ margin: "10px 0 0 0" }}
+          style={{ margin: "10px 0 0 0" }} // Keep specific margins
         >
           Search
         </button>
       </div>
-      <div class="login-box">
-        {!shares && <h1>Loading..</h1>}
-
+      <div className="login-box">
+        {load && <h1>Loading..</h1>} {/* Using 'load' state */}
         {!update && shares !== null && (
           <>
-            {!shares && <h1>No Shares</h1>}
-            <div className="shares-container">
-              {shares.map((share, index) => (
-                <div
-                  className="share"
-                  key={index}
-                  style={{
-                    backgroundColor:
-                      share.profit[0] > 0
-                        ? "rgba(145, 228, 107, 0.7)"
-                        : "rgba(243, 136, 136, 0.7)",
-                  }}
-                >
-                  <h1 style={{ color: share.profit[0] > 0 ? "green" : "red" }}>
-                    {share.symbol}
-                  </h1>
-                  <div style={{ height: "50px" }}>
-                    <div>
-                      <span>
-                        Change :{" "}
-                        {(
-                          ((share.profit[1] - share.price) / share.price) *
-                          100
-                        ).toFixed(2)}
-                        %
-                      </span>
-                      <span>Bought at: {share.price.toFixed(2)}</span>
-                      <span>Curr: {share.profit[1]}</span>
-                    </div>
-                    <div>
-                      <span>Qty: {share.quantity}</span>
-                      <span>Profit: {share.profit[0]}</span>
-                    </div>
-                  </div>
-                  <button
-                    className="button-52 hll"
-                    onClick={() =>
-                      sell(share.symbol, parseInt(share.profit[0]))
-                    }
+            {!shares || shares.length === 0 ? ( // Check for empty array too
+              <h1>No Shares</h1>
+            ) : (
+              <div className="shares-container">
+                {shares.map((share, index) => (
+                  <div
+                    className="share"
+                    key={index}
                     style={{
-                      disabled: disabled,
-                      position: "relative",
-                      top: "100px",
+                      backgroundColor: "#25254A",
                     }}
                   >
-                    Sell
-                  </button>
-                </div>
-              ))}
-            </div>
+                    <h1
+                      style={{
+                        color: "lightcyan", // Changed text color to white
+                        backgroundColor:
+                          share.profit[0] > 0
+                            ? PROFIT_BACKGROUND // Use new profit color
+                            : LOSS_BACKGROUND, // Use new loss color
+                        fontSize: "25px",
+                      }}
+                    >
+                      {share.symbol}
+                    </h1>
+                    <div style={{ height: "50px" }}>
+                      {" "}
+                      {/* Consider removing fixed height if content varies */}
+                      <div>
+                        <span>
+                          Change :{" "}
+                          {(
+                            ((share.profit[1] - share.price) / share.price) *
+                            100
+                          ).toFixed(2)}
+                          %
+                        </span>
+                        <span>Bought at: {share.price.toFixed(2)}</span>
+                        <span>Curr: {share.profit[1]}</span>
+                      </div>
+                      <div>
+                        <span>Qty: {share.quantity}</span>
+                        <span>Profit: {share.profit[0]}</span>
+                      </div>
+                    </div>
+                    <button
+                      className="button-52 hll" // `hll` class already has the pink background from CSS
+                      onClick={() =>
+                        sell(share.symbol, parseInt(share.profit[0]))
+                      }
+                      style={{
+                        // 'disabled' is a boolean prop, not a style property
+                        // Instead of disabled: disabled, use the 'disabled' prop directly on the button
+                        position: "relative",
+                        top: "100px",
+                        margin: "70px 0px 0px 0px",
+                      }}
+                      disabled={disabled} // Correct way to disable the button
+                    >
+                      Sell
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </>
         )}
       </div>

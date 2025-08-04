@@ -7,6 +7,7 @@ import { fetchShares, fetchprof } from "./functions";
 import IndexRatios from "./IndexRatios";
 import Alerts from "./Alerts";
 import ChartComponent from "./Chart";
+import AnalyticsDisplay from "./AnalyticsDispay";
 function App() {
   const {
     port,
@@ -15,139 +16,138 @@ function App() {
     setLoading,
     shares,
     setShares,
-    load,
+    load, // Note: 'load' is declared but not used in the provided snippet
     profitnow,
     setProfitnow,
   } = useContext(MyContext);
+
   const [tops, settops] = useState(false);
   const [alerts, setalerts] = useState(false);
   const [graph, setgraphs] = useState(false);
   const [model, setmodel] = useState(false);
   const [pred, setpred] = useState("");
+  const [analytics, setAnalytics] = useState(true);
   useEffect(() => {
     const fetchData = async () => {
       const share = localStorage.getItem("shares")
         ? JSON.parse(localStorage.getItem("shares"))
         : "a";
+
       const sh = localStorage.getItem("prof")
         ? JSON.parse(localStorage.getItem("prof"))
         : "a";
+
       setProfit(sh);
+
       if (share === "a" || sh === "a") {
         const res = await fetchShares(
           setShares,
+
           setLoading,
+
           shares,
+
           setProfitnow,
+
           setProfit
         );
-        console.log(sh);
+
         const rep = JSON.parse(res);
-        setShares(rep); // Update shares state with fetched data
-        localStorage.setItem("shares", JSON.stringify(rep)); // Store shares in localStorage
+
+        setShares(rep);
+
+        localStorage.setItem("shares", JSON.stringify(rep));
+
         localStorage.setItem("prof", JSON.stringify(sh));
+
         setProfit(sh);
-        fetchprof(setProfit, setShares, setProfitnow, rep); // Fetch profit data
-        setLoading(false); // Set loading to false after fetching data
+
+        fetchprof(setProfit, setShares, setProfitnow, rep);
+
+        setLoading(false);
       } else {
         const shar = JSON.parse(localStorage.getItem("shares"));
-        fetchprof(setProfit, setShares, setProfitnow, shar); // Fetch profit data using current shares state
+
+        fetchprof(setProfit, setShares, setProfitnow, shar);
       }
     };
 
-    fetchData(); // Initial fetch on component mount
+    fetchData();
 
-    const interval = setInterval(() => {
-      fetchData(); // Fetch data every 10 seconds
-    }, 15000);
+    const interval = setInterval(fetchData, 15000);
 
-    return () => {
-      clearInterval(interval); // Clean up interval on component unmount
-    };
-  }, [setLoading]); // Dependency array ensures this effect runs whenever `shares` changes
+    return () => clearInterval(interval);
+  }, [setLoading]);
+
   const fetchmod = async () => {
-    const modout = fetch("http://localhost:5000/api/model", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const mod = await modout;
-    const modres = await mod.json();
-    console.log(modres["ans"]);
+    const modout = await fetch("http://localhost:5000/api/model");
+
+    const modres = await modout.json();
+
     setpred("hello");
   };
-  // useEffect(() => {
-  //   // Socket.IO connection
-  //   const socket = socketIOClient("http://localhost:5000/api/searching");
-  //   socket.on("data_response", (newData) => {
-  //     console.log(newData);
-  //     // setProfitnow(newData);
-  //   });
 
-  //   return () => socket.disconnect();
-  // }, []);
+  // Define new colors for profit/loss backgrounds that fit the dark theme
+  // These are derived from the UI's existing palette or complementary tones
+  const profitBackgroundColor = "#28A745"; // A good green (You can fine-tune this)
+  const lossBackgroundColor = "#DC3545"; // A good red (You can fine-tune this)
+
+  // Use the card background color from your CSS for consistency
+  // Note: To directly access CSS variables here, you might need a different approach
+  // or define these as JS constants if they're purely for JS-driven styles.
+  // For now, I'll use a fixed color close to --card-background defined in your CSS.
+  const cardDefaultBackgroundColor = "#25254A"; // Approx value of var(--card-background)
 
   return (
     <div
       className="App"
+      // Change App background based on profit, using new dark-theme friendly colors
       style={{
-        backgroundColor:
-          profit > 0 ? "rgba(145, 228, 107, 0.7)" : "rgba(243, 136, 136, 0.7)",
+        backgroundColor: "#25254A",
       }}
     >
-      {!port && <Search></Search>}
+      {!port && <Search />}
       {!port && (
-        <h2
-          style={{
-            backgroundColor:
-              profit > 0
-                ? "rgba(145, 228, 107, 0.7)"
-                : "rgba(243, 136, 136, 0.7)",
-            position: "absolute",
-            top: "10%",
-            marginLeft: "100px",
-            fontWeight: "300",
-            minWidth: "300px",
-            height: "15%",
-            fontFamily: "Curier New",
-            fontSize: "50px",
-            padding: "20px 0 20px 0",
-            borderRadius: "20px",
-            boxShadow: "0 15px 25px rgba(0, 0, 0, 0.6)",
-          }}
-        >
-          Present<hr style={{ margin: "0" }}></hr>
-          {profitnow > 0 ? `Profit: ${profitnow}` : `Loss: ${profitnow}`}
-        </h2>
+        <div className="profit-cards">
+          <h2
+            className="present-card"
+            style={{
+              // Change card background based on profitnow, using new colors
+              color:
+                profitnow > 0
+                  ? profitBackgroundColor // Darker green for present profit
+                  : lossBackgroundColor, // Darker red for present loss
+              // Or keep it consistent with the overall card background if profit/loss is shown inside
+              // backgroundColor: cardDefaultBackgroundColor,
+            }}
+          >
+            Present
+            <hr style={{ margin: "0" }} />
+            {profitnow > 0 ? `Profit: ₹${profitnow}` : `Loss: ₹${profitnow}`}
+          </h2>
+
+          <h2
+            className="alltime-card"
+            style={{
+              // Change card background based on overall profit, using new colors
+              color:
+                profit > 0
+                  ? profitBackgroundColor // Darker green for all-time profit
+                  : lossBackgroundColor, // Darker red for all-time loss
+              // Or keep it consistent with the overall card background
+              // backgroundColor: cardDefaultBackgroundColor,
+            }}
+          >
+            AllTime
+            <hr style={{ margin: "0" }} />
+            {profit > 0 ? `Profit: ₹${profit}` : `Loss: ₹${profit}`}
+          </h2>
+        </div>
       )}
-      {!port && (
-        <h2
-          style={{
-            backgroundColor:
-              profit > 0
-                ? "rgba(145, 228, 107, 0.7)"
-                : "rgba(243, 136, 136, 0.7)",
-            position: "absolute",
-            top: "10%",
-            right: "100px",
-            minWidth: "300px",
-            height: "15%",
-            fontFamily: "Curier New",
-            fontSize: "50px",
-            padding: "20px",
-            fontWeight: "300",
-            borderRadius: "20px",
-            boxShadow: "0 15px 25px rgba(0, 0, 0, 0.6)",
-          }}
-        >
-          AllTime<hr style={{ margin: "0" }}></hr>
-          {profit > 0 ? `Profit: ${profit}` : `Loss: ${profit}`}
-        </h2>
-      )}
-      {port && <Stocks></Stocks>}
+      {port && <Stocks />}
+
       <button
-        class="button-52 hb"
+        className="button-52 hb"
         onClick={() => {
           setalerts(false);
           settops((prev) => !prev);
@@ -156,7 +156,7 @@ function App() {
         TOPS!
       </button>
       <button
-        class="button-52 hb"
+        className="button-52 hb"
         onClick={() => {
           settops(false);
           setalerts((prev) => !prev);
@@ -165,7 +165,7 @@ function App() {
         Alerts!
       </button>
       <button
-        class="button-52 hb"
+        className="button-52 hb"
         onClick={() => {
           setgraphs((prev) => !prev);
         }}
@@ -173,7 +173,7 @@ function App() {
         Graph
       </button>
       <button
-        class="button-52 hb"
+        className="button-52 hb"
         onClick={() => {
           fetchmod();
           setmodel((prev) => !prev);
@@ -181,15 +181,17 @@ function App() {
       >
         model
       </button>
+
       <div className="misc-container">
         {graph && (
           <div className="chartdiv">
-            <ChartComponent></ChartComponent>
+            <ChartComponent />
           </div>
         )}
         {pred && <h2>{pred}</h2>}
-        {tops && <IndexRatios></IndexRatios>}
-        {alerts && <Alerts></Alerts>}
+        {tops && <IndexRatios />}
+        {alerts && <Alerts />}
+        {analytics && <AnalyticsDisplay shares={shares} />}
       </div>
     </div>
   );

@@ -1,54 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* New Colors from UI Image */
+  --bg-dark-blue: #1a1a32;
+  --accent-vibrant-blue: #4a6bf7;
+  --accent-electric-pink: #f72c6a;
+  --text-light-blue: #a0a5d6;
+  --text-white: #ffffff;
+  --card-background: #25254a; /* Slightly lighter than main BG for cards */
+  --card-border: #3a3a6f; /* Darker border for cards */
+  --input-border-focus: #4a6bf7; /* Match vibrant blue for input focus */
+}
+
 .App {
   text-align: center;
-  /* display: flex; */
   justify-content: center;
-  /* align-items: center; */
   width: 100%;
   min-height: 100vh;
+  background-color: var(--bg-dark-blue); /* Updated */
 }
 .head {
-  /* background-color: #057025; */
   width: 100%;
-  color: #dafce7;
-  text-shadow: #013336 4px 4px 5px;
-  /* margin: 0 0 10%; */
-  /* position: relative; */
-  /* left: -50px; */
+  color: var(--text-white); /* Updated */
+  text-shadow: var(--accent-vibrant-blue) 2px 2px 4px; /* Updated shadow color */
 }
 .head1 {
-  /* background-color: #057025; */
   width: 100%;
-  color: #e1fcda;
-  text-shadow: #013336 4px 4px 5px;
+  color: var(--text-light-blue); /* Updated */
+  text-shadow: var(--accent-vibrant-blue) 2px 2px 4px; /* Updated shadow color */
   font-family: cursive;
-  /* position: relative; */
-  /* left: -50px; */
 }
-/* CSS */
+
+/* Button Style */
 .button-52 {
   font-size: 16px;
   font-weight: 900;
   letter-spacing: 1px;
-  padding: 3px 5px 80px 0;
+  padding: 3px 5px 80px 0; /* This padding seems unusual, check if it's intentional */
   height: 40px;
   outline: 0;
-  border: 1px solid rgb(0, 0, 0);
+  border: 1px solid var(--card-border); /* Updated border */
   cursor: pointer;
   position: relative;
   margin-top: 40px;
   margin-bottom: 50px;
   top: 7px;
-  /* left: 17%; */
-  background-color: rgb(255, 225, 32);
+  background-color: var(--accent-vibrant-blue); /* Updated */
+  color: var(--text-white); /* Updated */
   user-select: none;
-  /* margin: 0px 20px; */
   -webkit-user-select: none;
   touch-action: manipulation;
 }
 
 .button-52:after {
   content: "";
-  background-color: #312900;
+  background-color: darken(
+    var(--accent-vibrant-blue),
+    15%
+  ); /* Darker shade of button blue */
+  /* Using a conceptual 'darken' here, in pure CSS you might pick a specific darker hex or use a CSS preprocessor */
+  /* For example, if --accent-vibrant-blue is #4A6BF7, a darker shade could be #2D4CBA */
+  background-color: #2d4cba; /* Manually picked darker blue for example */
   width: 100%;
   z-index: -1;
   position: absolute;
@@ -59,9 +73,8 @@
 }
 
 .button-52:hover:after {
-  top: 0px;
-  left: 0px;
-  /* z-index: 0; */
+  top: 0;
+  left: 0;
 }
 
 @media (min-width: 768px) {
@@ -85,13 +98,11 @@
   outline: none;
   box-shadow: none;
   border: none;
-  /* margin-bottom: 10px; */
   top: 0;
-  color: hsl(0, 0%, 0%);
+  color: var(--text-white); /* Updated */
   font-size: 30px;
   letter-spacing: 0.05em;
   transition: 0.5s;
-  /* z-index: 0; */
 }
 
 .inputbox span {
@@ -100,27 +111,25 @@
   top: 0;
   padding: 20px 10px 10px;
   font-size: 30px;
-  color: #000000;
-  letter-spacing: 00.05em;
+  color: var(--text-light-blue); /* Updated */
   transition: 0.5s;
   pointer-events: none;
 }
 
 .inputbox input:valid ~ span,
 .inputbox input:focus ~ span {
-  color: transparent;
+  color: transparent; /* Remains transparent */
   transform: translateX(-10px) translateY(-34px);
-  font-size: 0, 0;
+  font-size: 0; /* Remains 0 */
 }
 
 .inputbox i {
   position: absolute;
   left: 0;
   bottom: 0;
-  /* font-size: 10%; */
   width: 100%;
   height: 2px;
-  background: #c9f1a3;
+  background: var(--input-border-focus); /* Updated */
   border-radius: 6px;
   transition: 0.5s;
   pointer-events: none;
@@ -133,119 +142,245 @@
 }
 
 .h11 {
-  color: #033b3f;
+  color: var(--text-white); /* Updated */
   font-size: x-large;
 }
 
 .shares-container {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  /* height: 500px; */
   gap: 8px 16px;
   padding: 16px;
 }
+
 .share {
-  border: 2px solid #302e2eb6;
+  border: 2px solid var(--card-border); /* Updated */
   padding: 0 16px;
   border-radius: 8px;
-  background-color: rgba(243, 136, 136, 0.457);
+  background-color: var(--card-background); /* Updated */
   width: 315px;
   text-align: center;
-  /* box-shadow: 0 0 8px 8px 4px rgb(0, 0, 0); */
   height: 390px;
   z-index: 0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Added shadow for depth */
 }
+
 .share span {
   font-size: 20px;
-  padding: 10px 10px 10px 10px;
+  padding: 10px;
   text-align: center;
   display: inline-block;
-  margin-right: 8px; /* Space between spans */
-  color: #555;
-  background-color: #dafce7;
-  border-bottom: 2px solid black;
+  margin-right: 8px;
+  color: var(--text-white); /* Updated */
+  background-color: var(--accent-vibrant-blue); /* Updated for an accent look */
+  border-bottom: 2px solid var(--bg-dark-blue); /* Updated to contrast with accent */
 }
+
 .login-box {
-  /* position: relative; */
   display: flex;
   justify-content: center;
-  /* width: 100%; */
-  /* margin: 0 0 0 auto; */
   height: auto;
 }
+
 .share h1 {
-  background-color: #ffffff;
+  background-color: var(
+    --card-background
+  ); /* Updated to match card background */
   margin-bottom: 40px;
-  border-bottom: 2px solid rgb(153, 227, 100);
+  border-bottom: 2px solid var(--accent-electric-pink); /* Updated for accent */
 }
+
 .share div {
   margin-bottom: 8px;
 }
+
 .login-box2 {
-  /* top: 45%; */
-  /* left: 35%; */
   position: relative;
   left: 30%;
   top: 10%;
   z-index: 0;
   max-width: 35%;
-  min-height: 300px; /* Minimum height */
-  height: auto;
-  /* height: auto; */
-  /* height: auto; */
+  min-height: 300px;
   padding: 5px 40px;
-  /* transform: translate(50%, 50%); */
-  /* transition: 1s; */
-  background: rgba(128, 229, 133, 0.987);
+  background: var(--card-background); /* Updated */
   box-sizing: border-box;
-  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4); /* Slightly darker shadow for contrast */
   border-radius: 10px;
-  /* margin: 70% 10%; */
 }
+
 .hll {
-  color: #ffffff;
-  background-color: rgb(255, 0, 0);
+  color: var(--text-white); /* Updated */
+  background-color: var(--accent-electric-pink); /* Updated to pink */
 }
 .hll:after {
-  background-color: rgb(119, 2, 2);
-  margin: 0;
+  background-color: darken(var(--accent-electric-pink), 20%); /* Darker pink */
+  /* For example, if --accent-electric-pink is #F72C6A, a darker shade could be #BF1A51 */
+  background-color: #bf1a51; /* Manually picked darker pink for example */
 }
-.hb {
-  background-color: #48eb87;
 
+.hb {
+  background-color: var(--accent-vibrant-blue); /* Updated to blue */
   margin-left: 20px;
   width: 100px;
   padding: 1px;
   margin-bottom: 10px;
-  /* margin: 0px; */
 }
 .hb:after {
-  background-color: rgb(7, 51, 0);
-  /* margin-left: 20px; */
+  background-color: darken(var(--accent-vibrant-blue), 20%); /* Darker blue */
+  /* For example, if --accent-vibrant-blue is #4A6BF7, a darker shade could be #2D4CBA */
+  background-color: #2d4cba; /* Manually picked darker blue for example */
   left: -7px;
-  /* margin-bottom: ; */
 }
+
 .login-box3 {
-  display: none;
-  background-color: yellow;
+  display: none; /* This was originally display:none and yellow, keeping it hidden */
+  background-color: transparent; /* No specific color needed if hidden */
   width: 10px;
 }
+
 .stt {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 40px; /* Adjust the gap between items as needed */
-  /* height: 500px; */
+  gap: 40px;
 }
+
 .alerts {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 3px; /* Adjust the gap between items as needed */
+  gap: 3px;
   width: 99%;
 }
+
 .misc-container {
   display: flex;
   justify-content: center;
 }
+
 .chartdiv {
   width: 900px;
+}
+
+@media (max-width: 1200px) {
+  .shares-container,
+  .alerts,
+  .stt {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .chartdiv {
+    width: 100%;
+    max-width: 700px;
+  }
+
+  .login-box2 {
+    left: 10%;
+    max-width: 80%;
+  }
+}
+
+@media (max-width: 900px) {
+  .shares-container,
+  .alerts,
+  .stt {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .port-box,
+  .button-52 {
+    font-size: 14px;
+  }
+
+  .chartdiv {
+    width: 95%;
+  }
+
+  .login-box2 {
+    left: 5%;
+    max-width: 90%;
+    padding: 20px;
+  }
+
+  .inputbox input {
+    font-size: 24px;
+  }
+
+  .inputbox span {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  .shares-container,
+  .alerts,
+  .stt {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .chartdiv {
+    width: 100%;
+  }
+
+  .button-52 {
+    font-size: 12px;
+    padding: 6px 10px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+  }
+
+  .inputbox input,
+  .inputbox span {
+    font-size: 20px;
+  }
+
+  .login-box2 {
+    left: 0;
+    max-width: 95%;
+    padding: 15px;
+  }
+}
+
+.profit-cards {
+  position: absolute;
+  top: 120px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 100px;
+  gap: 20px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.present-card,
+.alltime-card {
+  pointer-events: auto;
+  min-width: 300px;
+  font-size: 50px;
+  padding: 20px;
+  border-radius: 20px;
+  background-color: var(--card-background); /* Updated */
+  color: var(--text-white); /* Updated */
+  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6);
+  font-family: "Courier New";
+  font-weight: 300;
+}
+
+@media (max-width: 1300px) {
+  .profit-cards {
+    position: static;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    padding: 0;
+    pointer-events: auto;
+  }
+
+  .present-card,
+  .alltime-card {
+    width: 90%;
+    font-size: 32px;
+    height: auto;
+    margin-bottom: 20px;
+  }
 }

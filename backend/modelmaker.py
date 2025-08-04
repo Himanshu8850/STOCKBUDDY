@@ -23,16 +23,16 @@ def train(fil):
     lim+=l%2
     X_train, Y_train = al[:lim, :-1], al[:lim, -1]
     X_test, Y_test = al[lim:, :-1], al[lim:, -1]
-    label_mapping = {-1: 0, 0: 1, 1: 2}
+    label_mapping = {-1: 0, 0: 0, 1: 1}
     Y_train = np.array([label_mapping[label] for label in Y_train])
     Y_test = np.array([label_mapping[label] for label in Y_test])
 
     # Split test data into validation and test sets
     X_test, X_validation = np.split(X_test, 2)
-    Y_test, Y_validation = np.split(to_categorical(Y_test, 3), 2)
+    Y_test, Y_validation = np.split(to_categorical(Y_test, 2), 2)
 
     # Convert Y_train to one-hot encoding
-    Y_train = to_categorical(Y_train, 3)
+    Y_train = to_categorical(Y_train, 2)
 
     # Define the model architecture
     model = Sequential()
@@ -45,7 +45,7 @@ def train(fil):
     model.add(BatchNormalization())
     model.add(Dense(150, activation='relu', kernel_initializer='he_normal'))
     model.add(BatchNormalization())
-    model.add(Dense(3, activation='softmax'))  # Output layer with 2 units for binary classification
+    model.add(Dense(2, activation='softmax'))  # Output layer with 2 units for binary classification
 
     # Compile the model
     model.compile(loss='categorical_crossentropy', optimizer=RMSprop(learning_rate=0.001), metrics=['accuracy'])
@@ -71,12 +71,12 @@ def train(fil):
 # /////////////////////////////////////////////////////////////
 
 
-tr=8
-fut=8
+tr=12
+fut=12
 maker.compute_features(tr,fut,"tr")
 maker.compute_features(tr,fut,"t")
 
-data=pd.read_csv('trainn.csv')
+data=pd.read_csv('trainn .csv')
 # with open('/kaggle/input/finall/ticks.csv') as f:
 #     d = json.load(f)
 #     # print(d['candles'])

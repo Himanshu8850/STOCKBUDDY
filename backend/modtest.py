@@ -3,7 +3,7 @@ from keras.models import load_model
 # Load the saved model
 import datetime
 def predict(fil):
-    model = load_model('mod2.keras')
+    model = load_model('8_8min.keras')
     X_new = fil
     X=np.array(X_new)
     Y=X[:,-1]

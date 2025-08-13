@@ -2,13 +2,12 @@ import { useContext } from "react";
 import React from "react";
 import { MyContext } from "./context";
 import { fetchShares } from "./functions";
-const Search = () => {
+const Search = ({ onClose }) => {
   const {
     data,
     setData,
     text,
     setShares,
-    setport,
     setQty,
     setLoading,
     load,
@@ -21,10 +20,10 @@ const Search = () => {
     setText,
     al,
     qty,
+    showSuccessToast,
+    showErrorToast,
+    showWarningToast,
   } = useContext(MyContext);
-  const showsportfolio = () => {
-    setport(true);
-  };
   const getch = async () => {
     setLoading(true);
     try {
@@ -34,16 +33,18 @@ const Search = () => {
       if (response.ok) {
         const data = await response.json();
         if (data[0] == null) {
-          alert("enter valid symbol");
+          showErrorToast("Please enter a valid stock symbol");
           setLoading(false);
           return;
         }
         setData(data);
-
+        showSuccessToast(`Found ${data[1][2]} - ₹${data[0].toFixed(2)}`);
         setLoading(false);
-      } else alert("enter valid symbol");
+      } else {
+        showErrorToast("Please enter a valid stock symbol");
+      }
     } catch (err) {
-      alert(err);
+      showErrorToast(`Error fetching stock data: ${err.message}`);
       setLoading(false);
     }
   };
@@ -55,85 +56,140 @@ const Search = () => {
     setText(e.target.value);
     setData(null);
   };
-  const buyclick = () => {
+  const buyclick = async () => {
     if (!qty) {
       setal(true);
+      showWarningToast("Please specify quantity before buying");
     } else {
       try {
-        fetch("http://localhost:5000/buy", {
+        const response = await fetch("http://localhost:5000/buy", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ symbol: text, price: data[0], qtx: qty }),
-        })
-          .then((response) => {
-            setupdate(true);
-            console.log(response.json());
-          })
-          .then(() => {
-            fetchShares(setShares, setLoading, shares, setProfitnow, setProfit);
-            setupdate(false);
-          })
-          .then(() => {
-            alert("success");
-            setData(null);
-          });
+        });
+
+        if (response.ok) {
+          setupdate(true);
+          await fetchShares(setShares, setLoading, shares, setProfitnow, setProfit);
+          setupdate(false);
+          
+          showSuccessToast(`Successfully purchased ${qty} shares of ${data[1][2]} at ₹${data[0].toFixed(2)} each!`);
+          setData(null);
+          setText("");
+          setQty("");
+          
+          // Close the search component after successful purchase
+          if (onClose) {
+            onClose();
+          }
+        } else {
+          showErrorToast("Failed to purchase stock. Please try again.");
+        }
       } catch (err) {
-        alert(err);
+        showErrorToast(`Purchase failed: ${err.message}`);
       }
     }
   };
   return (
-    <div class="login-box2">
-      <h1 className="head">STOCK BUDDY</h1>
-      <div class="inputbox">
-        <input
-          required="required"
-          type="text"
-          value={text}
-          onChange={inputadd}
-        />
-        <span>Enter Stock</span>
-        <i></i>
-      </div>
-      <button class="button-52" onClick={getch}>
-        Fetch
-      </button>
-      <button class="button-52 hb" onClick={showsportfolio}>
-        Portfolio
-      </button>
-      {load && <h1>Loading..</h1>}
-      {data && (
-        <div class="inputbox">
-          <input required="required" type="text" onChange={qtychange} />
-          <span>Enter Qty</span>
-          <i></i>
+    <div className="modern-search-container">
+      <div className="search-header">
+        <div className="search-title">
+          <span className="search-icon">🔍</span>
+          <h2>Stock Search</h2>
         </div>
-      )}
+        {onClose && (
+          <button className="close-button" onClick={onClose} title="Close Search">
+            ✕
+          </button>
+        )}
+      </div>
 
-      {!load && (
-        <>
-          {data && <h1 className="h11">NAME:{data[1][2]}</h1>}
-          {data && <h1 className="h11">OPEN : {data[1][0].toFixed(1)}</h1>}
-          {data && <h1 className="h11">CURR : {data[0].toFixed(1)}</h1>}
-          {data && (
-            <h1 className="h11">
-              DIFF. : {data && (data[0] - data[1][0]).toFixed(1)}
-            </h1>
-          )}
-          <div>
-            {data && (
+      <div className="search-form">
+        <div className="modern-input-group">
+          <input
+            type="text"
+            value={text}
+            onChange={inputadd}
+            placeholder="Enter Stock Symbol"
+            className="modern-input"
+          />
+          <button 
+            className="modern-btn primary" 
+            onClick={getch}
+            disabled={!text || load}
+          >
+            {load ? (
               <>
-                {al && <h2>Please specify Quantity!</h2>}
-                <button class="button-52 hb" onClick={buyclick}>
-                  BUY
-                </button>
+                <span className="loading-spinner"></span>
+                Fetching...
+              </>
+            ) : (
+              <>
+                <span className="btn-icon">📈</span>
+                Fetch
               </>
             )}
+          </button>
+        </div>
+
+        {data && (
+          <div className="stock-details">
+            <div className="stock-info-card">
+              <div className="stock-header">
+                <h3 className="stock-name">{data[1][2]}</h3>
+                <div className="stock-price">
+                  <span className="current-price">₹{data[0].toFixed(2)}</span>
+                  <span className={`price-change ${data[0] - data[1][0] >= 0 ? 'positive' : 'negative'}`}>
+                    {data[0] - data[1][0] >= 0 ? '+' : ''}
+                    {(data[0] - data[1][0]).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="stock-stats">
+                <div className="stat-item">
+                  <span className="stat-label">Open</span>
+                  <span className="stat-value">₹{data[1][0].toFixed(2)}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Current</span>
+                  <span className="stat-value">₹{data[0].toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="quantity-section">
+              <div className="modern-input-group">
+                <input
+                  type="number"
+                  onChange={qtychange}
+                  placeholder="Enter Quantity"
+                  className="modern-input"
+                  min="1"
+                  value={qty}
+                />
+                <button 
+                  className="modern-btn success" 
+                  onClick={buyclick}
+                  disabled={!qty}
+                >
+                  <span className="btn-icon">💰</span>
+                  Buy Stock
+                </button>
+              </div>
+              
+              {al && (
+                <div className="error-message">
+                  <span className="error-icon">⚠️</span>
+                  Please specify quantity!
+                </div>
+              )}
+            </div>
           </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 };

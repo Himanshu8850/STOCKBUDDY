@@ -84,7 +84,12 @@ const ChartComponent = () => {
   }, []);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading chart data...</p>
+      </div>
+    );
   }
 
   const data = {
@@ -96,16 +101,81 @@ const ChartComponent = () => {
         borderColor:
           chartData[chartData.length - 1].price >=
           chartData[chartData.length - 2].price
-            ? "lightgreen"
-            : "red",
-        borderWidth: 1.7,
-        pointRadius: 8,
+            ? "#059669"
+            : "#dc2626",
+        borderWidth: 3,
+        pointRadius: 6,
+        pointBackgroundColor: 
+          chartData[chartData.length - 1].price >=
+          chartData[chartData.length - 2].price
+            ? "#059669"
+            : "#dc2626",
         fill: false,
+        tension: 0.2,
       },
     ],
   };
 
-  return <Line data={data} />;
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          font: {
+            size: 14,
+            weight: '600'
+          },
+          color: '#1f2937'
+        }
+      },
+      title: {
+        display: true,
+        text: 'Live Stock Price Chart',
+        font: {
+          size: 18,
+          weight: '700'
+        },
+        color: '#1f2937'
+      },
+    },
+    scales: {
+      y: {
+        grid: {
+          color: '#e2e8f0',
+        },
+        ticks: {
+          color: '#64748b',
+          font: {
+            size: 12,
+            weight: '500'
+          }
+        }
+      },
+      x: {
+        grid: {
+          color: '#e2e8f0',
+        },
+        ticks: {
+          color: '#64748b',
+          font: {
+            size: 12,
+            weight: '500'
+          }
+        }
+      }
+    }
+  };
+
+  return (
+    <div className="stocks-container">
+      <div className="performance-card" style={{ maxWidth: '100%', padding: '2rem' }}>
+        <div className="card-content">
+          <Line data={data} options={options} />
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default ChartComponent;

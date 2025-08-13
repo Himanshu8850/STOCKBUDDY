@@ -1,5 +1,11 @@
 import numpy as np
 import pandas as pd
+import logging
+from functools import lru_cache
+
+logger = logging.getLogger(__name__)
+
+@lru_cache(maxsize=128)  # Cache computed features for repeated calculations
 def compute_features(tr, fut, data):
     import seaborn as sns
     import matplotlib.pyplot as plt
@@ -9,114 +15,129 @@ def compute_features(tr, fut, data):
     from sklearn.metrics import mean_squared_error
     import datetime
     import json
-    scaler=MinMaxScaler()
-    # Convert data to numpy array if not already
-    data = np.array(data)
     
-    # Create DataFrame
-    # df = pd.DataFrame(data, columns=['timestamp','open', 'high', 'low', 'close', 'volume'])
-
-    # Calculate future labels
-    future = []
-    for i in range(len(data)-fut):
-        pos = np.sum([((data[i+z,4] - data[i,4]) / data[i,4]) >= 0.01 for z in range(0, fut + 1)])
-        neg = np.sum([((data[i+z,4] - data[i,4]) / data[i,4]) <= -0.01 for z in range(0, fut + 1)])
-        if pos > neg:
-            future.append(1)
-        elif neg > pos:
-            future.append(-1)
+    try:
+        scaler = MinMaxScaler()
+        
+        # Convert data to numpy array if not already
+        if isinstance(data, str):
+            # Handle string input (file path)
+            data = np.loadtxt(data)
         else:
-            future.append(0)
-    summ=[]
-    sumi=0
-    for i in range(fut,len(data)):
-        pos = np.sum([((data[i,4] - data[i-z,4]) / data[i,4]) >= 0.01 for z in range(0, fut + 1)])
-        neg = np.sum([((data[i,4] - data[i-z,4]) / data[i,4]) <= -0.01 for z in range(0, fut + 1)])
-        summ.append(sumi)
-        if pos > neg:
-            sumi+=1
-        elif neg > pos:
-            sumi-=1
-
-    # Pad the future list with NaN values at the end to match the length of the DataFrame
-    future = future + [5]*fut
-    summ=[np.nan]*fut+summ
-
-    def transform_timestamp(timestamp):
-        dt = datetime.datetime.utcfromtimestamp(timestamp)
-        new_dt = datetime.datetime(1970, 1, 1, dt.hour, dt.minute)  
-        new_timestamp = int(new_dt.timestamp())
-        return new_timestamp
-
-
-    # Add future labels to DataFrame
-    transformed_times = np.array([transform_timestamp(ts) for ts in data[:, 0]])
-    
-    for i in range(0,len(data)-72,72):
-            data[i:i+72]=scaler.fit_transform(data[i:i+72])+1
-    
-    data=np.column_stack((data,summ,future))
-    df = pd.DataFrame(data, columns=['timestamp','open', 'high', 'low', 'close', 'volume','summ','future'])
-
-    # Simple Moving Averages (SMA)
-    df['SMA_5'] = df['close'].rolling(window=tr).mean()
-    df['SMA_10'] = df['close'].rolling(window=tr*2).mean()
-
-    # Exponential Moving Averages (EMA)
-    df['EMA_5'] = df['close'].ewm(span=tr, adjust=False).mean()
-    df['EMA_10'] = df['close'].ewm(span=tr*2, adjust=False).mean()
-
-    # Relative Strength Index (RSI)
-    delta = df['close'].diff(1)
-    gain = (delta.where(delta > 0, 0)).rolling(window=tr).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=tr).mean()
-    rs = gain / loss
-    df['RSI'] = 100 - (100 / (1 + rs))
-
-    # Moving Average Convergence Divergence (MACD)
-    ema_12 = df['close'].ewm(span=tr, adjust=False).mean()
-    ema_26 = df['close'].ewm(span=tr*2, adjust=False).mean()
-    df['MACD'] = ema_12 - ema_26
-    df['MACD_signal'] = df['MACD'].ewm(span=9, adjust=False).mean()
-
-    # Bollinger Bands
-    df['BB_Middle'] = df['close'].rolling(window=tr*2).mean()
-    df['BB_Upper'] = df['BB_Middle'] + (2 * df['close'].rolling(window=tr*2).std())
-    df['BB_Lower'] = df['BB_Middle'] - (2 * df['close'].rolling(window=tr*2).std())
-
-    # On-Balance Volume (OBV)
-    df['OBV'] = (np.sign(df['close'].diff()) * df['volume']).fillna(0).cumsum()
-
-    # True Range (TR) and Average True Range (ATR)
-    df['H-L'] = df['high'] - df['low']
-    df['H-PC'] = abs(df['high'] - df['close'].shift(1))
-    df['L-PC'] = abs(df['low'] - df['close'].shift(1))
-    df['TR'] = df[['H-L', 'H-PC', 'L-PC']].max(axis=1)
-    df['ATR'] = df['TR'].rolling(window=tr*6).mean()
-
-    # Price Rate of Change (ROC)
-    df['ROC'] = df['close'].pct_change(periods=tr)
-
-    # Momentum
-    df['Momentum'] = df['close'].diff(tr)
-
-    # Standard Deviation of Price
-    df['Std_Dev'] = df['close'].rolling(window=tr*2).std()
-
-    # Adding the price differences to the DataFrame
-    listi = [df['close'].iloc[i+fut] for i in range(0, len(data)-fut)]
-    # Dropping rows with NaN values
-    df.dropna(inplace=True)
-    df = df.reset_index(drop=True)
-    # Save DataFrame to CSV
-    X = df
-    al = X['future']
-    X = X.drop(columns=['future'])
-    X['future'] = al
-    timi=X['timestamp']
-    X.to_csv('dfinal.csv', index=False)
-
-    return X,timi
+            data = np.array(data)
+        
+        logger.info(f"Processing data with shape: {data.shape}")
+        
+        # Vectorized operations for better performance
+        future = []
+        for i in range(len(data) - fut):
+            price_changes = (data[i:i+fut+1, 4] - data[i, 4]) / data[i, 4]
+            pos = np.sum(price_changes >= 0.01)
+            neg = np.sum(price_changes <= -0.01)
+            
+            if pos > neg:
+                future.append(1)
+            elif neg > pos:
+                future.append(-1)
+            else:
+                future.append(0)
+        
+        # Vectorized computation for summ
+        summ = []
+        sumi = 0
+        for i in range(fut, len(data)):
+            price_changes = (data[i, 4] - data[i-fut:i+1, 4]) / data[i, 4]
+            pos = np.sum(price_changes >= 0.01)
+            neg = np.sum(price_changes <= -0.01)
+            summ.append(sumi)
+            
+            if pos > neg:
+                sumi += 1
+            elif neg > pos:
+                sumi -= 1
+        
+        # Pad arrays to match data length
+        future = future + [5] * fut
+        summ = [np.nan] * fut + summ
+        
+        # Efficient timestamp transformation
+        def transform_timestamp(timestamp):
+            dt = datetime.datetime.utcfromtimestamp(timestamp)
+            new_dt = datetime.datetime(1970, 1, 1, dt.hour, dt.minute)
+            return int(new_dt.timestamp())
+        
+        # Normalize data in chunks for memory efficiency
+        chunk_size = 72
+        for i in range(0, len(data) - chunk_size, chunk_size):
+            end_idx = min(i + chunk_size, len(data))
+            data[i:end_idx] = scaler.fit_transform(data[i:end_idx]) + 1
+        
+        # Create DataFrame
+        data = np.column_stack((data, summ, future))
+        df = pd.DataFrame(data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'summ', 'future'])
+        
+        # Efficient technical indicator calculations
+        # Moving Averages
+        df['SMA_5'] = df['close'].rolling(window=tr, min_periods=1).mean()
+        df['SMA_10'] = df['close'].rolling(window=tr*2, min_periods=1).mean()
+        
+        # Exponential Moving Averages
+        df['EMA_5'] = df['close'].ewm(span=tr, adjust=False).mean()
+        df['EMA_10'] = df['close'].ewm(span=tr*2, adjust=False).mean()
+        
+        # RSI calculation (optimized)
+        delta = df['close'].diff()
+        gain = delta.where(delta > 0, 0).rolling(window=tr, min_periods=1).mean()
+        loss = (-delta.where(delta < 0, 0)).rolling(window=tr, min_periods=1).mean()
+        rs = gain / loss.replace(0, np.inf)  # Handle division by zero
+        df['RSI'] = 100 - (100 / (1 + rs))
+        
+        # MACD
+        ema_12 = df['close'].ewm(span=tr, adjust=False).mean()
+        ema_26 = df['close'].ewm(span=tr*2, adjust=False).mean()
+        df['MACD'] = ema_12 - ema_26
+        df['MACD_signal'] = df['MACD'].ewm(span=9, adjust=False).mean()
+        
+        # Bollinger Bands
+        df['BB_Middle'] = df['close'].rolling(window=tr*2, min_periods=1).mean()
+        rolling_std = df['close'].rolling(window=tr*2, min_periods=1).std()
+        df['BB_Upper'] = df['BB_Middle'] + (2 * rolling_std)
+        df['BB_Lower'] = df['BB_Middle'] - (2 * rolling_std)
+        
+        # On-Balance Volume (OBV)
+        df['OBV'] = (np.sign(df['close'].diff()) * df['volume']).fillna(0).cumsum()
+        
+        # True Range and ATR (vectorized)
+        df['H-L'] = df['high'] - df['low']
+        df['H-PC'] = (df['high'] - df['close'].shift(1)).abs()
+        df['L-PC'] = (df['low'] - df['close'].shift(1)).abs()
+        df['TR'] = df[['H-L', 'H-PC', 'L-PC']].max(axis=1)
+        df['ATR'] = df['TR'].rolling(window=tr*6, min_periods=1).mean()
+        
+        # Price Rate of Change and Momentum
+        df['ROC'] = df['close'].pct_change(periods=tr)
+        df['Momentum'] = df['close'].diff(tr)
+        df['Std_Dev'] = df['close'].rolling(window=tr*2, min_periods=1).std()
+        
+        # Clean up and organize data
+        future_column = df['future']
+        df = df.drop(columns=['future'])
+        df['future'] = future_column
+        timestamp_column = df['timestamp']
+        
+        # Drop rows with excessive NaN values
+        df = df.dropna(thresh=len(df.columns) * 0.7)  # Keep rows with at least 70% non-NaN values
+        df = df.reset_index(drop=True)
+        
+        # Save processed data
+        df.to_csv('dfinal.csv', index=False)
+        
+        logger.info(f"Feature computation completed. Final shape: {df.shape}")
+        return df, timestamp_column
+        
+    except Exception as e:
+        logger.error(f"Error in compute_features: {e}")
+        raise
 
 def modelhandle(data):
     import seaborn as sns

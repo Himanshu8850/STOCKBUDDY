@@ -18,106 +18,138 @@ const IndexRatios = () => {
         setChartData(chari.data.chartData);
         setLoading(false);
       } catch (err) {
-        alert("Indexratios", err);
+        console.error("IndexRatios error:", err);
+        setLoading(false);
       }
     } else setLoading(false);
-    // console.log(chartData);
   };
+
   useEffect(() => {
     fetchdata();
   }, []);
 
   if (loading) {
-    return <p>Loading...</p>;
-  }
-  if (!loading) {
-    const renderTable = (length) => {
-      return (
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <div className="stt">
-            {chartData
-              .filter((stock) => Object.keys(stock).length === length)
-              .sort((a, b) => (b.changeP || 0) - (a.changeP || 0))
-              .map((stock) => (
-                <div key={stock.id}>
-                  {length === 13 && (
-                    <div
-                      style={{
-                        fontSize: 20,
-                        backgroundColor: `${stock.color}`,
-                        width: "300px",
-                        textAlign: "center",
-                        height: "325px",
-                      }}
-                    >
-                      {length === 13 && stock.fullName && (
-                        <h3>{stock.fullName}</h3>
-                      )}
-
-                      <ul>ltp : {stock.ltp || "-"}</ul>
-                      <ul>
-                        change : {stock.change ? stock.change.toFixed(2) : "-"}
-                      </ul>
-                      <ul>
-                        changeP :
-                        {stock.changeP ? stock.changeP.toFixed(2) + "%" : "-"}
-                      </ul>
-                      <ul>sector : {stock.sector || "-"}</ul>
-                      <ul>
-                        mrkCap : {stock.mrkCap ? stock.mrkCap.toFixed(2) : "-"}
-                      </ul>
-                      <ul>
-                        url:
-                        {stock.url && (
-                          <a
-                            href={stock.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            More Info
-                          </a>
-                        )}
-                      </ul>
-                    </div>
-                  )}
-                  {length === 4 && (
-                    <div
-                      style={{
-                        fontSize: 20,
-                        backgroundColor: `lightgrey`,
-                        width: "300px",
-                        alignItems: "center",
-                        textAlign: "center",
-                        height: "100px",
-                      }}
-                    >
-                      <div>
-                        {length === 4 && stock.name && <div>{stock.name}</div>}
-                      </div>
-                      <div>{stock.totalStocks}</div>
-                    </div>
-                  )}
-                </div>
-              ))}
-          </div>
-        </div>
-      );
-    };
-
     return (
-      <div>
-        {chartData && (
-          <>
-            <h1>Index Ratios</h1>
-            <h2>length 13</h2>
-          </>
-        )}
-        {renderTable(13)}
-        {chartData && <h2>length 4</h2>}
-        {renderTable(4)}
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading top performers...</p>
       </div>
     );
   }
+
+  const renderStockCards = (length) => {
+    const filteredStocks = chartData
+      .filter((stock) => Object.keys(stock).length === length)
+      .sort((a, b) => (b.changeP || 0) - (a.changeP || 0));
+
+    if (length === 13) {
+      return (
+        <div className="stocks-grid">
+          {filteredStocks.map((stock, index) => (
+            <div className="performance-card" key={stock.id || index}>
+              <div className="card-header">
+                <div className="rank-badge">#{index + 1}</div>
+                <div className={`change-indicator ${stock.changeP >= 0 ? 'positive' : 'negative'}`}>
+                  {stock.changeP >= 0 ? '📈' : '📉'}
+                </div>
+              </div>
+              
+              <div className="card-content">
+                <h3 className="stock-name">{stock.fullName || 'Unknown Stock'}</h3>
+                
+                <div className="price-section">
+                  <div className="current-price">
+                    <span className="price-label">LTP</span>
+                    <span className="price-value">₹{stock.ltp || '-'}</span>
+                  </div>
+                  
+                  <div className="price-change">
+                    <span className={`change-value ${stock.changeP >= 0 ? 'positive' : 'negative'}`}>
+                      {stock.changeP ? `${stock.changeP.toFixed(2)}%` : '-'}
+                    </span>
+                    <span className="change-amount">
+                      {stock.change ? `₹${stock.change.toFixed(2)}` : '-'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="stock-details">
+                  <div className="detail-item">
+                    <span className="detail-label">Sector</span>
+                    <span className="detail-value">{stock.sector || 'N/A'}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-label">Market Cap</span>
+                    <span className="detail-value">
+                      {stock.mrkCap ? `₹${stock.mrkCap.toFixed(2)}` : 'N/A'}
+                    </span>
+                  </div>
+                </div>
+
+                {stock.url && (
+                  <div className="card-actions">
+                    <a
+                      href={stock.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="info-link"
+                    >
+                      <span className="link-icon">🔗</span>
+                      More Info
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (length === 4) {
+      return (
+        <div className="indices-grid">
+          {filteredStocks.map((stock, index) => (
+            <div className="index-card" key={stock.id || index}>
+              <div className="index-icon">📊</div>
+              <h4 className="index-name">{stock.name || 'Index'}</h4>
+              <div className="total-stocks">
+                <span className="stocks-count">{stock.totalStocks || 0}</span>
+                <span className="stocks-label">Stocks</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <div className="stocks-container">
+      {chartData && chartData.length > 0 ? (
+        <>
+          {renderStockCards(13)}
+          
+          <div className="section-divider">
+            <h3 className="subsection-title">
+              <span className="title-icon">📈</span>
+              Market Indices
+            </h3>
+          </div>
+          
+          {renderStockCards(4)}
+        </>
+      ) : (
+        <div className="empty-state">
+          <div className="empty-icon">📊</div>
+          <h3>No Data Available</h3>
+          <p>Unable to fetch top performers data at the moment.</p>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default IndexRatios;

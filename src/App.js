@@ -1,4 +1,5 @@
 import "./App.css";
+import "./Toast.css";
 import { useEffect, useContext, useState } from "react";
 import Search from "./search";
 import { MyContext } from "./context";
@@ -7,7 +8,9 @@ import { fetchShares, fetchprof } from "./functions";
 import IndexRatios from "./IndexRatios";
 import Alerts from "./Alerts";
 import ChartComponent from "./Chart";
-import AnalyticsDisplay from "./AnalyticsDispay";
+import AnalyticsDisplay from "./AnalyticsDisplay";
+import { ToastContainer } from "./Toast";
+
 function App() {
   const {
     port,
@@ -16,17 +19,17 @@ function App() {
     setLoading,
     shares,
     setShares,
-    load, // Note: 'load' is declared but not used in the provided snippet
     profitnow,
     setProfitnow,
+    toasts,
+    removeToast,
   } = useContext(MyContext);
 
-  const [tops, settops] = useState(false);
-  const [alerts, setalerts] = useState(false);
-  const [graph, setgraphs] = useState(false);
-  const [model, setmodel] = useState(false);
+  // Navigation state management
+  const [currentView, setCurrentView] = useState('dashboard'); // dashboard, tops, alerts, graph, model, analytics
+  const [previousView, setPreviousView] = useState('dashboard');
   const [pred, setpred] = useState("");
-  const [analytics, setAnalytics] = useState(true);
+  const [showSearchBar, setShowSearchBar] = useState(false);
   useEffect(() => {
     const fetchData = async () => {
       const share = localStorage.getItem("shares")
@@ -42,157 +45,251 @@ function App() {
       if (share === "a" || sh === "a") {
         const res = await fetchShares(
           setShares,
-
           setLoading,
-
           shares,
-
           setProfitnow,
-
           setProfit
         );
 
         const rep = JSON.parse(res);
-
         setShares(rep);
-
         localStorage.setItem("shares", JSON.stringify(rep));
-
         localStorage.setItem("prof", JSON.stringify(sh));
-
         setProfit(sh);
-
         fetchprof(setProfit, setShares, setProfitnow, rep);
-
         setLoading(false);
       } else {
         const shar = JSON.parse(localStorage.getItem("shares"));
-
         fetchprof(setProfit, setShares, setProfitnow, shar);
       }
     };
 
     fetchData();
-
     const interval = setInterval(fetchData, 15000);
-
     return () => clearInterval(interval);
-  }, [setLoading]);
+  }, [setLoading, setProfit, setProfitnow, setShares, shares]);
 
   const fetchmod = async () => {
-    const modout = await fetch("http://localhost:5000/api/model");
-
-    const modres = await modout.json();
-
-    setpred("hello");
+    try {
+      const modout = await fetch("http://localhost:5000/api/model");
+      const modres = await modout.json();
+      console.log("Model response:", modres);
+      setpred("AI Prediction Model Loaded Successfully!");
+    } catch (error) {
+      console.error("Error loading model:", error);
+      setpred("Error loading AI model. Please ensure backend is running.");
+    }
   };
 
-  // Define new colors for profit/loss backgrounds that fit the dark theme
-  // These are derived from the UI's existing palette or complementary tones
-  const profitBackgroundColor = "#28A745"; // A good green (You can fine-tune this)
-  const lossBackgroundColor = "#DC3545"; // A good red (You can fine-tune this)
+  const navigateTo = (view) => {
+    setPreviousView(currentView);
+    setCurrentView(view);
+  };
 
-  // Use the card background color from your CSS for consistency
-  // Note: To directly access CSS variables here, you might need a different approach
-  // or define these as JS constants if they're purely for JS-driven styles.
-  // For now, I'll use a fixed color close to --card-background defined in your CSS.
-  const cardDefaultBackgroundColor = "#25254A"; // Approx value of var(--card-background)
+  const goBack = () => {
+    setCurrentView(previousView);
+    setPreviousView('dashboard');
+  };
 
-  return (
-    <div
-      className="App"
-      // Change App background based on profit, using new dark-theme friendly colors
-      style={{
-        backgroundColor: "#25254A",
-      }}
-    >
-      {!port && <Search />}
-      {!port && (
-        <div className="profit-cards">
-          <h2
-            className="present-card"
-            style={{
-              // Change card background based on profitnow, using new colors
-              color:
-                profitnow > 0
-                  ? profitBackgroundColor // Darker green for present profit
-                  : lossBackgroundColor, // Darker red for present loss
-              // Or keep it consistent with the overall card background if profit/loss is shown inside
-              // backgroundColor: cardDefaultBackgroundColor,
-            }}
+  const renderHeader = () => (
+    <header className="app-header">
+      <div className="header-content">
+        <h1 className="app-title">
+          <span className="title-icon">📈</span>
+          STOCKBUDDY
+        </h1>
+        
+        {/* Navigation Links */}
+        <nav className="nav-links">
+          <button 
+            className={`nav-button ${currentView === 'portfolio' ? 'active' : ''}`}
+            onClick={() => navigateTo('portfolio')}
           >
-            Present
-            <hr style={{ margin: "0" }} />
-            {profitnow > 0 ? `Profit: ₹${profitnow}` : `Loss: ₹${profitnow}`}
-          </h2>
+            Portfolio
+          </button>
+        </nav>
 
-          <h2
-            className="alltime-card"
-            style={{
-              // Change card background based on overall profit, using new colors
-              color:
-                profit > 0
-                  ? profitBackgroundColor // Darker green for all-time profit
-                  : lossBackgroundColor, // Darker red for all-time loss
-              // Or keep it consistent with the overall card background
-              // backgroundColor: cardDefaultBackgroundColor,
-            }}
-          >
-            AllTime
-            <hr style={{ margin: "0" }} />
-            {profit > 0 ? `Profit: ₹${profit}` : `Loss: ₹${profit}`}
-          </h2>
+        {/* Search and Actions */}
+        <div className="header-actions">
+          <div className={`search-container ${showSearchBar ? 'expanded' : ''}`}>
+            <button 
+              className="search-toggle"
+              onClick={() => setShowSearchBar(!showSearchBar)}
+              title="Search Stocks"
+            >
+              🔍
+            </button>
+            {showSearchBar && (
+              <div className="search-wrapper">
+                <Search onClose={() => setShowSearchBar(false)} />
+              </div>
+            )}
+          </div>
+
+          {/* Back Button */}
+          {currentView !== 'dashboard' && (
+            <button className="back-button" onClick={goBack}>
+              ← Back
+            </button>
+          )}
         </div>
-      )}
-      {port && <Stocks />}
+      </div>
+    </header>
+  );
 
-      <button
-        className="button-52 hb"
-        onClick={() => {
-          setalerts(false);
-          settops((prev) => !prev);
-        }}
-      >
-        TOPS!
-      </button>
-      <button
-        className="button-52 hb"
-        onClick={() => {
-          settops(false);
-          setalerts((prev) => !prev);
-        }}
-      >
-        Alerts!
-      </button>
-      <button
-        className="button-52 hb"
-        onClick={() => {
-          setgraphs((prev) => !prev);
-        }}
-      >
-        Graph
-      </button>
-      <button
-        className="button-52 hb"
-        onClick={() => {
+  const renderDashboard = () => (
+    <div className="dashboard">
+      {/* Profit Cards */}
+      <div className="profit-cards-container">
+        <div className="profit-card present-profit">
+          <div className="card-header">
+            <span className="card-icon">💰</span>
+            <h3>Current P&L</h3>
+          </div>
+          <div className="card-value">
+            <span className={`amount ${profitnow >= 0 ? 'profit' : 'loss'}`}>
+              ₹{Math.abs(profitnow).toLocaleString()}
+            </span>
+            <span className="label">{profitnow >= 0 ? 'Profit' : 'Loss'}</span>
+          </div>
+        </div>
+
+        <div className="profit-card alltime-profit">
+          <div className="card-header">
+            <span className="card-icon">🏆</span>
+            <h3>All Time P&L</h3>
+          </div>
+          <div className="card-value">
+            <span className={`amount ${profit >= 0 ? 'profit' : 'loss'}`}>
+              ₹{Math.abs(profit).toLocaleString()}
+            </span>
+            <span className="label">{profit >= 0 ? 'Profit' : 'Loss'}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Grid */}
+      <div className="nav-grid">
+        <div className="nav-card" onClick={() => navigateTo('tops')}>
+          <div className="nav-icon">🚀</div>
+          <h3>Top Performers</h3>
+          <p>Market leaders & trending stocks</p>
+        </div>
+
+        <div className="nav-card" onClick={() => navigateTo('alerts')}>
+          <div className="nav-icon">🔔</div>
+          <h3>Market Alerts</h3>
+          <p>News, updates & notifications</p>
+        </div>
+
+        <div className="nav-card" onClick={() => navigateTo('graph')}>
+          <div className="nav-icon">📊</div>
+          <h3>Charts</h3>
+          <p>Technical analysis & trends</p>
+        </div>
+
+        <div className="nav-card" onClick={() => {
           fetchmod();
-          setmodel((prev) => !prev);
-        }}
-      >
-        model
-      </button>
+          navigateTo('model');
+        }}>
+          <div className="nav-icon">🤖</div>
+          <h3>AI Predictions</h3>
+          <p>Machine learning insights</p>
+        </div>
 
-      <div className="misc-container">
-        {graph && (
-          <div className="chartdiv">
+        <div className="nav-card" onClick={() => navigateTo('analytics')}>
+          <div className="nav-icon">📈</div>
+          <h3>Analytics</h3>
+          <p>Portfolio performance metrics</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderCurrentView = () => {
+    switch(currentView) {
+      case 'portfolio':
+        return (
+          <div className="view-container">
+            <h2 className="view-title">
+              <span className="title-icon">📊</span>
+              My Portfolio
+            </h2>
+            <Stocks />
+          </div>
+        );
+        
+      case 'tops':
+        return (
+          <div className="view-container">
+            <h2 className="view-title">
+              <span className="title-icon">🚀</span>
+              Top Performers
+            </h2>
+            <IndexRatios />
+          </div>
+        );
+      
+      case 'alerts':
+        return (
+          <div className="view-container">
+            <h2 className="view-title">
+              <span className="title-icon">🔔</span>
+              Market Alerts
+            </h2>
+            <Alerts />
+          </div>
+        );
+      
+      case 'graph':
+        return (
+          <div className="view-container">
+            <h2 className="view-title">
+              <span className="title-icon">📊</span>
+              Charts & Analysis
+            </h2>
             <ChartComponent />
           </div>
-        )}
-        {pred && <h2>{pred}</h2>}
-        {tops && <IndexRatios />}
-        {alerts && <Alerts />}
-        {analytics && <AnalyticsDisplay shares={shares} />}
-      </div>
+        );
+      
+      case 'model':
+        return (
+          <div className="view-container">
+            <h2 className="view-title">
+              <span className="title-icon">🤖</span>
+              AI Predictions
+            </h2>
+            {pred && <div className="prediction-result">{pred}</div>}
+            <div className="model-placeholder">
+              <p>Advanced ML models are analyzing market trends...</p>
+            </div>
+          </div>
+        );
+      
+      case 'analytics':
+        return (
+          <div className="view-container">
+            <h2 className="view-title">
+              <span className="title-icon">📈</span>
+              Portfolio Analytics
+            </h2>
+            <AnalyticsDisplay shares={shares} />
+          </div>
+        );
+      
+      default:
+        return renderDashboard();
+    }
+  };
+
+  return (
+    <div className="app">
+      {renderHeader()}
+      <main className="app-main">
+        {renderCurrentView()}
+      </main>
+      {/* Toast Container for notifications */}
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   );
 }

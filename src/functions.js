@@ -100,7 +100,7 @@ const fetchprof = async (setProfit, setShares, setProfitnow, shares) => {
 };
 
 // Export all functions
-module.exports = {
+export {
   fetchShares,
   calculateProfit,
   fetchprof,

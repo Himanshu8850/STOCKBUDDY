@@ -15,6 +15,38 @@ export const MyContextProvider = ({ children }) => {
   const [chartData, setChartData] = useState(null);
   const [chart, setChart] = useState(null);
   const [update, setupdate] = useState(false);
+  
+  // Toast notification state
+  const [toasts, setToasts] = useState([]);
+
+  // Toast functions
+  const addToast = (message, type = 'info', duration = 3000) => {
+    const id = Date.now() + Math.random();
+    const newToast = { id, message, type, duration };
+    setToasts(prev => [...prev, newToast]);
+    return id;
+  };
+
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+
+  const showSuccessToast = (message, duration = 3000) => {
+    return addToast(message, 'success', duration);
+  };
+
+  const showErrorToast = (message, duration = 4000) => {
+    return addToast(message, 'error', duration);
+  };
+
+  const showWarningToast = (message, duration = 3500) => {
+    return addToast(message, 'warning', duration);
+  };
+
+  const showInfoToast = (message, duration = 3000) => {
+    return addToast(message, 'info', duration);
+  };
+
   return (
     <MyContext.Provider
       value={{
@@ -42,6 +74,14 @@ export const MyContextProvider = ({ children }) => {
         setLoading,
         al,
         setal,
+        // Toast functions
+        toasts,
+        addToast,
+        removeToast,
+        showSuccessToast,
+        showErrorToast,
+        showWarningToast,
+        showInfoToast,
       }}
     >
       {children}

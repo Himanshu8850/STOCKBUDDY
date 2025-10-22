@@ -25,4 +25,4 @@ yarn-debug.log*
 yarn-error.log*
 
 
-/backend/.env
+/backend/.envbackend/config.py

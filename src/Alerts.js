@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { AnalyticsIcon } from "./icons";
 import Modal from "react-modal";
 import { MyContext } from "./context";
 
@@ -64,30 +65,44 @@ const IndexRatios = () => {
                 className="performance-card"
                 key={stock.scId}
                 onClick={() => openModal(stock)}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: "pointer" }}
               >
                 <div className="card-header">
                   <div className="rank-badge">#{index + 1}</div>
-                  <div className={`change-indicator ${stock.percentchange >= 0 ? 'positive' : 'negative'}`}>
-                    {stock.percentchange >= 0 ? '📈' : '📉'}
+                  <div
+                    className={`change-indicator ${
+                      stock.percentchange >= 0 ? "positive" : "negative"
+                    }`}
+                  >
+                    <AnalyticsIcon size={18} />
                   </div>
                 </div>
-                
+
                 <div className="card-content">
-                  <h3 className="stock-name">{stock.fullName || stock.shortName || 'Unknown Stock'}</h3>
-                  
+                  <h3 className="stock-name">
+                    {stock.fullName || stock.shortName || "Unknown Stock"}
+                  </h3>
+
                   <div className="price-section">
                     <div className="current-price">
                       <span className="price-label">Price</span>
-                      <span className="price-value">₹{stock.price || '-'}</span>
+                      <span className="price-value">₹{stock.price || "-"}</span>
                     </div>
-                    
+
                     <div className="price-change">
-                      <span className={`change-value ${stock.percentchange >= 0 ? 'positive' : 'negative'}`}>
-                        {stock.percentchange ? `${parseFloat(stock.percentchange).toFixed(2)}%` : '-'}
+                      <span
+                        className={`change-value ${
+                          stock.percentchange >= 0 ? "positive" : "negative"
+                        }`}
+                      >
+                        {stock.percentchange
+                          ? `${parseFloat(stock.percentchange).toFixed(2)}%`
+                          : "-"}
                       </span>
                       <span className="change-amount">
-                        {stock.change ? `₹${parseFloat(stock.change).toFixed(2)}` : '-'}
+                        {stock.change
+                          ? `₹${parseFloat(stock.change).toFixed(2)}`
+                          : "-"}
                       </span>
                     </div>
                   </div>
@@ -95,11 +110,15 @@ const IndexRatios = () => {
                   <div className="stock-details">
                     <div className="detail-item">
                       <span className="detail-label">Exchange</span>
-                      <span className="detail-value">{stock.exchg || 'N/A'}</span>
+                      <span className="detail-value">
+                        {stock.exchg || "N/A"}
+                      </span>
                     </div>
                     <div className="detail-item">
                       <span className="detail-label">Followers</span>
-                      <span className="detail-value">{stock.followerCount || 0}</span>
+                      <span className="detail-value">
+                        {stock.followerCount || 0}
+                      </span>
                     </div>
                   </div>
 
@@ -155,24 +174,34 @@ const IndexRatios = () => {
             overlay: {
               backgroundColor: "rgba(0, 0, 0, 0.5)",
               backdropFilter: "blur(5px)",
-            }
+            },
           }}
         >
           <div style={{ padding: "1rem" }}>
             <div className="card-header" style={{ marginBottom: "1.5rem" }}>
-              <h2 className="stock-name">{selectedStock.fullName || selectedStock.shortName}</h2>
-              <div className={`change-indicator ${selectedStock.percentchange >= 0 ? 'positive' : 'negative'}`}>
-                {selectedStock.percentchange >= 0 ? '📈' : '📉'}
+              <h2 className="stock-name">
+                {selectedStock.fullName || selectedStock.shortName}
+              </h2>
+              <div
+                className={`change-indicator ${
+                  selectedStock.percentchange >= 0 ? "positive" : "negative"
+                }`}
+              >
+                <AnalyticsIcon size={18} />
               </div>
             </div>
-            
+
             <div className="price-section" style={{ marginBottom: "1.5rem" }}>
               <div className="current-price">
                 <span className="price-label">Price</span>
                 <span className="price-value">₹{selectedStock.price}</span>
               </div>
               <div className="price-change">
-                <span className={`change-value ${selectedStock.percentchange >= 0 ? 'positive' : 'negative'}`}>
+                <span
+                  className={`change-value ${
+                    selectedStock.percentchange >= 0 ? "positive" : "negative"
+                  }`}
+                >
                   {selectedStock.percentchange}%
                 </span>
                 <span className="change-amount">₹{selectedStock.change}</span>
@@ -186,7 +215,9 @@ const IndexRatios = () => {
               </div>
               <div className="detail-item">
                 <span className="detail-label">Followers</span>
-                <span className="detail-value">{selectedStock.followerCount}</span>
+                <span className="detail-value">
+                  {selectedStock.followerCount}
+                </span>
               </div>
             </div>
 
@@ -206,44 +237,69 @@ const IndexRatios = () => {
 
             {selectedStock.feeds && (
               <div style={{ marginBottom: "1.5rem" }}>
-                <h3 style={{ color: "#1f2937", marginBottom: "1rem" }}>Feeds:</h3>
-                {Object.entries(selectedStock.feeds).map(([feedType, feedData]) => (
-                  <div key={feedType} style={{ marginBottom: "1rem" }}>
-                    <h4 style={{ color: "#667eea", marginBottom: "0.5rem" }}>{feedType}</h4>
-                    {Array.isArray(feedData) &&
-                      feedData.map((feed, index) => (
-                        <div key={index} style={{ marginBottom: "0.5rem" }}>
-                          <h5 style={{ color: "#64748b", fontSize: "0.9rem" }}>{feed.subCategory}</h5>
-                          {feed.data &&
-                            Array.isArray(feed.data.dataList) &&
-                            feed.data.dataList.map((item, idx) => (
-                              <div key={idx} style={{ padding: "0.5rem", background: "#f8fafc", borderRadius: "8px", margin: "0.25rem 0" }}>
-                                {Object.entries(item).map(
-                                  ([key, value]) =>
-                                    (key === "action" || key === "fullName") && (
-                                      <p key={key} style={{ margin: "0.25rem 0", fontSize: "0.85rem" }}>
-                                        <strong>{key}:</strong> {value}
-                                      </p>
-                                    )
-                                )}
-                              </div>
-                            ))}
-                        </div>
-                      ))}
-                  </div>
-                ))}
+                <h3 style={{ color: "#1f2937", marginBottom: "1rem" }}>
+                  Feeds:
+                </h3>
+                {Object.entries(selectedStock.feeds).map(
+                  ([feedType, feedData]) => (
+                    <div key={feedType} style={{ marginBottom: "1rem" }}>
+                      <h4 style={{ color: "#667eea", marginBottom: "0.5rem" }}>
+                        {feedType}
+                      </h4>
+                      {Array.isArray(feedData) &&
+                        feedData.map((feed, index) => (
+                          <div key={index} style={{ marginBottom: "0.5rem" }}>
+                            <h5
+                              style={{ color: "#64748b", fontSize: "0.9rem" }}
+                            >
+                              {feed.subCategory}
+                            </h5>
+                            {feed.data &&
+                              Array.isArray(feed.data.dataList) &&
+                              feed.data.dataList.map((item, idx) => (
+                                <div
+                                  key={idx}
+                                  style={{
+                                    padding: "0.5rem",
+                                    background: "#f8fafc",
+                                    borderRadius: "8px",
+                                    margin: "0.25rem 0",
+                                  }}
+                                >
+                                  {Object.entries(item).map(
+                                    ([key, value]) =>
+                                      (key === "action" ||
+                                        key === "fullName") && (
+                                        <p
+                                          key={key}
+                                          style={{
+                                            margin: "0.25rem 0",
+                                            fontSize: "0.85rem",
+                                          }}
+                                        >
+                                          <strong>{key}:</strong> {value}
+                                        </p>
+                                      )
+                                  )}
+                                </div>
+                              ))}
+                          </div>
+                        ))}
+                    </div>
+                  )
+                )}
               </div>
             )}
-            
-            <button 
+
+            <button
               onClick={closeModal}
               className="info-link"
-              style={{ 
+              style={{
                 background: "linear-gradient(135deg, #dc2626, #b91c1c)",
                 width: "100%",
                 padding: "0.8rem",
                 border: "none",
-                borderRadius: "10px"
+                borderRadius: "10px",
               }}
             >
               <span className="link-icon">✕</span>

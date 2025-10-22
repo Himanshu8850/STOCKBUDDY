@@ -67,12 +67,13 @@ const calculateProfit = async (symbol, pri, qtt) => {
       throw new Error("Network response was not ok");
     }
     const data = await response.json();
-    // console.log(data);
-    // console.log("calcprof", shares);
-    return [parseInt((data[0] - pri) * qtt), data[0]];
+    if (!Array.isArray(data) || typeof data[0] !== "number") {
+      return [0, 0];
+    }
+    const profit = (data[0] - pri) * qtt;
+    return [isNaN(profit) ? 0 : parseInt(profit), data[0]];
   } catch (error) {
-    // console.error(`Error calculating profit for ${symbol}:`, error);
-    return 0; // Default to 0 profit if error occurs
+    return [0, 0]; // Always return a valid array
   }
 };
 
@@ -87,7 +88,9 @@ const fetchprof = async (setProfit, setShares, setProfitnow, shares) => {
         share.price,
         share.quantity
       );
-      tot += profit[0];
+      const profitVal =
+        Array.isArray(profit) && !isNaN(profit[0]) ? profit[0] : 0;
+      tot += profitVal;
       return { ...share, profit };
     })
   );
@@ -95,13 +98,11 @@ const fetchprof = async (setProfit, setShares, setProfitnow, shares) => {
   // console.log(tot);
   setShares(shareslist);
   localStorage.setItem("shares", JSON.stringify(shareslist));
-  // console.log("fetchprof", shares);
-  // setProfit(res.json().profit);
+
+  const oldprof = await fetch("http://localhost:5000/api/profit");
+  const oldprofval = await oldprof.json();
+  setProfit(oldprofval.profit); // Update the main profit state
 };
 
 // Export all functions
-export {
-  fetchShares,
-  calculateProfit,
-  fetchprof,
-};
+export { fetchShares, calculateProfit, fetchprof };

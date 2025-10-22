@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { AnalyticsIcon } from "./icons";
 import { MyContext } from "./context";
 const IndexRatios = () => {
   const { chartData, setChartData } = useContext(MyContext);
@@ -49,26 +50,36 @@ const IndexRatios = () => {
             <div className="performance-card" key={stock.id || index}>
               <div className="card-header">
                 <div className="rank-badge">#{index + 1}</div>
-                <div className={`change-indicator ${stock.changeP >= 0 ? 'positive' : 'negative'}`}>
-                  {stock.changeP >= 0 ? '📈' : '📉'}
+                <div
+                  className={`change-indicator ${
+                    stock.changeP >= 0 ? "positive" : "negative"
+                  }`}
+                >
+                  <AnalyticsIcon size={18} />
                 </div>
               </div>
-              
+
               <div className="card-content">
-                <h3 className="stock-name">{stock.fullName || 'Unknown Stock'}</h3>
-                
+                <h3 className="stock-name">
+                  {stock.fullName || "Unknown Stock"}
+                </h3>
+
                 <div className="price-section">
                   <div className="current-price">
                     <span className="price-label">LTP</span>
-                    <span className="price-value">₹{stock.ltp || '-'}</span>
+                    <span className="price-value">₹{stock.ltp || "-"}</span>
                   </div>
-                  
+
                   <div className="price-change">
-                    <span className={`change-value ${stock.changeP >= 0 ? 'positive' : 'negative'}`}>
-                      {stock.changeP ? `${stock.changeP.toFixed(2)}%` : '-'}
+                    <span
+                      className={`change-value ${
+                        stock.changeP >= 0 ? "positive" : "negative"
+                      }`}
+                    >
+                      {stock.changeP ? `${stock.changeP.toFixed(2)}%` : "-"}
                     </span>
                     <span className="change-amount">
-                      {stock.change ? `₹${stock.change.toFixed(2)}` : '-'}
+                      {stock.change ? `₹${stock.change.toFixed(2)}` : "-"}
                     </span>
                   </div>
                 </div>
@@ -76,12 +87,14 @@ const IndexRatios = () => {
                 <div className="stock-details">
                   <div className="detail-item">
                     <span className="detail-label">Sector</span>
-                    <span className="detail-value">{stock.sector || 'N/A'}</span>
+                    <span className="detail-value">
+                      {stock.sector || "N/A"}
+                    </span>
                   </div>
                   <div className="detail-item">
                     <span className="detail-label">Market Cap</span>
                     <span className="detail-value">
-                      {stock.mrkCap ? `₹${stock.mrkCap.toFixed(2)}` : 'N/A'}
+                      {stock.mrkCap ? `₹${stock.mrkCap.toFixed(2)}` : "N/A"}
                     </span>
                   </div>
                 </div>
@@ -111,8 +124,10 @@ const IndexRatios = () => {
         <div className="indices-grid">
           {filteredStocks.map((stock, index) => (
             <div className="index-card" key={stock.id || index}>
-              <div className="index-icon">📊</div>
-              <h4 className="index-name">{stock.name || 'Index'}</h4>
+              <div className="index-icon">
+                <AnalyticsIcon size={36} />
+              </div>
+              <h4 className="index-name">{stock.name || "Index"}</h4>
               <div className="total-stocks">
                 <span className="stocks-count">{stock.totalStocks || 0}</span>
                 <span className="stocks-label">Stocks</span>
@@ -131,19 +146,23 @@ const IndexRatios = () => {
       {chartData && chartData.length > 0 ? (
         <>
           {renderStockCards(13)}
-          
+
           <div className="section-divider">
             <h3 className="subsection-title">
-              <span className="title-icon">📈</span>
+              <span className="title-icon">
+                <AnalyticsIcon size={24} />
+              </span>
               Market Indices
             </h3>
           </div>
-          
+
           {renderStockCards(4)}
         </>
       ) : (
         <div className="empty-state">
-          <div className="empty-icon">📊</div>
+          <div className="empty-icon">
+            <AnalyticsIcon size={36} />
+          </div>
           <h3>No Data Available</h3>
           <p>Unable to fetch top performers data at the moment.</p>
         </div>

@@ -3,11 +3,11 @@ import { MyContext } from "./context";
 import { fetchShares } from "./functions";
 
 const Stocks = () => {
-  const { 
-    load, 
-    shares, 
-    setShares, 
-    update, 
+  const {
+    load,
+    shares,
+    setShares,
+    update,
     setupdate,
     showSuccessToast,
     showErrorToast,
@@ -40,12 +40,17 @@ const Stocks = () => {
           setupdate(false);
         };
         updatedShares();
-        
+
         // Calculate and show profit/loss
-        const profitText = profit >= 0 
-          ? `Sold ${symbol} with a profit of ₹${Math.abs(profit).toLocaleString()}! 📈`
-          : `Sold ${symbol} with a loss of ₹${Math.abs(profit).toLocaleString()} 📉`;
-          
+        const profitText =
+          profit >= 0
+            ? `Sold ${symbol} with a profit of ₹${Math.abs(
+                profit
+              ).toLocaleString()}!`
+            : `Sold ${symbol} with a loss of ₹${Math.abs(
+                profit
+              ).toLocaleString()}`;
+
         showSuccessToast(profitText);
       } else {
         showErrorToast(`Failed to sell ${symbol}. Please try again.`);
@@ -68,7 +73,7 @@ const Stocks = () => {
             <p>Loading your portfolio...</p>
           </div>
         )}
-        
+
         {!update && shares !== null && !load && (
           <>
             {!shares || shares.length === 0 ? (
@@ -85,29 +90,47 @@ const Stocks = () => {
                   const profitAmount = profitData[0] || 0;
                   const currentPrice = profitData[1] || share.price || 0;
                   const buyPrice = share.price || 0;
-                  const changePercent = buyPrice > 0 ? ((currentPrice - buyPrice) / buyPrice) * 100 : 0;
-                  
+                  const changePercent =
+                    buyPrice > 0
+                      ? ((currentPrice - buyPrice) / buyPrice) * 100
+                      : 0;
+
                   return (
                     <div className="performance-card" key={index}>
                       <div className="card-header">
-                        <div className="rank-badge">{share.symbol || 'Unknown'}</div>
-                        <div className={`change-indicator ${profitAmount >= 0 ? 'positive' : 'negative'}`}>
-                          {profitAmount >= 0 ? '📈' : '📉'}
+                        <div className="rank-badge">
+                          {share.symbol || "Unknown"}
+                        </div>
+                        <div
+                          className={`change-indicator ${
+                            profitAmount >= 0 ? "positive" : "negative"
+                          }`}
+                        >
+                          {profitAmount >= 0 ? "+" : "-"}
                         </div>
                       </div>
-                      
+
                       <div className="card-content">
-                        <h3 className="stock-name">{share.symbol || 'Unknown Stock'}</h3>
-                        
+                        <h3 className="stock-name">
+                          {share.symbol || "Unknown Stock"}
+                        </h3>
+
                         <div className="price-section">
                           <div className="current-price">
                             <span className="price-label">Current Price</span>
-                            <span className="price-value">₹{currentPrice.toFixed(2)}</span>
+                            <span className="price-value">
+                              ₹{currentPrice.toFixed(2)}
+                            </span>
                           </div>
-                          
+
                           <div className="price-change">
-                            <span className={`change-value ${changePercent >= 0 ? 'positive' : 'negative'}`}>
-                              {changePercent >= 0 ? '+' : ''}{changePercent.toFixed(2)}%
+                            <span
+                              className={`change-value ${
+                                changePercent >= 0 ? "positive" : "negative"
+                              }`}
+                            >
+                              {changePercent >= 0 ? "+" : ""}
+                              {changePercent.toFixed(2)}%
                             </span>
                             <span className="change-amount">
                               ₹{(currentPrice - buyPrice).toFixed(2)}
@@ -118,33 +141,50 @@ const Stocks = () => {
                         <div className="stock-details">
                           <div className="detail-item">
                             <span className="detail-label">Bought At</span>
-                            <span className="detail-value">₹{buyPrice.toFixed(2)}</span>
+                            <span className="detail-value">
+                              ₹{buyPrice.toFixed(2)}
+                            </span>
                           </div>
                           <div className="detail-item">
                             <span className="detail-label">Quantity</span>
-                            <span className="detail-value">{share.quantity || 0}</span>
+                            <span className="detail-value">
+                              {share.quantity || 0}
+                            </span>
                           </div>
                           <div className="detail-item">
                             <span className="detail-label">Total P&L</span>
-                            <span className={`detail-value ${profitAmount >= 0 ? 'positive' : 'negative'}`}>
-                              {profitAmount >= 0 ? '+' : ''}₹{Math.abs(profitAmount).toLocaleString()}
+                            <span
+                              className={`detail-value ${
+                                profitAmount >= 0 ? "positive" : "negative"
+                              }`}
+                            >
+                              {profitAmount >= 0 ? "+" : ""}₹
+                              {Math.abs(profitAmount).toLocaleString()}
                             </span>
                           </div>
                         </div>
 
                         <div className="card-actions">
                           <button
-                            className={`info-link ${disabled ? 'disabled' : ''}`}
-                            onClick={() => sell(share.symbol, parseInt(profitAmount))}
+                            className={`info-link ${
+                              disabled ? "disabled" : ""
+                            }`}
+                            onClick={() =>
+                              sell(share.symbol, parseInt(profitAmount))
+                            }
                             disabled={disabled}
                             style={{
-                              background: disabled ? '#94a3b8' : 'linear-gradient(135deg, #dc2626, #b91c1c)',
-                              cursor: disabled ? 'not-allowed' : 'pointer',
-                              width: '100%'
+                              background: disabled
+                                ? "#94a3b8"
+                                : "linear-gradient(135deg, #dc2626, #b91c1c)",
+                              cursor: disabled ? "not-allowed" : "pointer",
+                              width: "100%",
                             }}
                           >
-                            <span className="link-icon">{disabled ? '⏳' : '💰'}</span>
-                            {disabled ? 'Selling...' : 'Sell Stock'}
+                            <span className="link-icon">
+                              {disabled ? "…" : "Sell"}
+                            </span>
+                            {disabled ? "Selling..." : "Sell Stock"}
                           </button>
                         </div>
                       </div>

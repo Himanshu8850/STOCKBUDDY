@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import React from "react";
 import { MyContext } from "./context";
+import { SearchIcon, MoneyIcon } from "./icons";
 import { fetchShares } from "./functions";
 const Search = ({ onClose }) => {
   const {
@@ -15,7 +16,6 @@ const Search = ({ onClose }) => {
     setProfit,
     setal,
     shares,
-    update,
     setupdate,
     setText,
     al,
@@ -72,14 +72,24 @@ const Search = ({ onClose }) => {
 
         if (response.ok) {
           setupdate(true);
-          await fetchShares(setShares, setLoading, shares, setProfitnow, setProfit);
+          await fetchShares(
+            setShares,
+            setLoading,
+            shares,
+            setProfitnow,
+            setProfit
+          );
           setupdate(false);
-          
-          showSuccessToast(`Successfully purchased ${qty} shares of ${data[1][2]} at ₹${data[0].toFixed(2)} each!`);
+
+          showSuccessToast(
+            `Successfully purchased ${qty} shares of ${
+              data[1][2]
+            } at ₹${data[0].toFixed(2)} each!`
+          );
           setData(null);
           setText("");
           setQty("");
-          
+
           // Close the search component after successful purchase
           if (onClose) {
             onClose();
@@ -96,11 +106,17 @@ const Search = ({ onClose }) => {
     <div className="modern-search-container">
       <div className="search-header">
         <div className="search-title">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon">
+            <SearchIcon />
+          </span>
           <h2>Stock Search</h2>
         </div>
         {onClose && (
-          <button className="close-button" onClick={onClose} title="Close Search">
+          <button
+            className="close-button"
+            onClick={onClose}
+            title="Close Search"
+          >
             ✕
           </button>
         )}
@@ -115,19 +131,25 @@ const Search = ({ onClose }) => {
             placeholder="Enter Stock Symbol"
             className="modern-input"
           />
-          <button 
-            className="modern-btn primary" 
+          <button
+            className="modern-btn primary"
             onClick={getch}
             disabled={!text || load}
           >
             {load ? (
-              <>
-                <span className="loading-spinner"></span>
-                Fetching...
-              </>
+              <div className="ai-loader">
+                <span className="dot" />
+                <span className="dot" />
+                <span className="dot" />
+                <span className="dot" />
+                <span className="dot" />
+                <span className="label">Thinking…</span>
+              </div>
             ) : (
               <>
-                <span className="btn-icon">📈</span>
+                <span className="btn-icon">
+                  <SearchIcon />
+                </span>
                 Fetch
               </>
             )}
@@ -141,13 +163,17 @@ const Search = ({ onClose }) => {
                 <h3 className="stock-name">{data[1][2]}</h3>
                 <div className="stock-price">
                   <span className="current-price">₹{data[0].toFixed(2)}</span>
-                  <span className={`price-change ${data[0] - data[1][0] >= 0 ? 'positive' : 'negative'}`}>
-                    {data[0] - data[1][0] >= 0 ? '+' : ''}
+                  <span
+                    className={`price-change ${
+                      data[0] - data[1][0] >= 0 ? "positive" : "negative"
+                    }`}
+                  >
+                    {data[0] - data[1][0] >= 0 ? "+" : ""}
                     {(data[0] - data[1][0]).toFixed(2)}
                   </span>
                 </div>
               </div>
-              
+
               <div className="stock-stats">
                 <div className="stat-item">
                   <span className="stat-label">Open</span>
@@ -170,16 +196,18 @@ const Search = ({ onClose }) => {
                   min="1"
                   value={qty}
                 />
-                <button 
-                  className="modern-btn success" 
+                <button
+                  className="modern-btn success"
                   onClick={buyclick}
                   disabled={!qty}
                 >
-                  <span className="btn-icon">💰</span>
+                  <span className="btn-icon">
+                    <MoneyIcon />
+                  </span>
                   Buy Stock
                 </button>
               </div>
-              
+
               {al && (
                 <div className="error-message">
                   <span className="error-icon">⚠️</span>

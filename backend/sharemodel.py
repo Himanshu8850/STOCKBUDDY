@@ -2,7 +2,7 @@ from mongoengine import Document, StringField, FloatField, IntField, connect
 import os
 
 # Use environment variable for MongoDB URI for better security
-MONGODB_URI = os.getenv('MONGODB_URI', 'mongodb+srv://text:123@cluster0.stfphmt.mongodb.net/')
+MONGODB_URI = os.getenv('MONGODB_URI')
 connect('Shares', host=MONGODB_URI)
 
 class Share(Document):

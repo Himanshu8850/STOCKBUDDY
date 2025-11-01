@@ -394,26 +394,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👨‍💻 Author
 
 **Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [Your LinkedIn](https://linkedin.com/in/yourprofile)
-
----
-
-## 🙏 Acknowledgments
-
-- **Groww**: For providing reliable Indian stock market data API
-- **Google Gemini**: For powering the AI analysis features
-- **Create React App**: For the excellent React boilerplate
-- **MongoDB**: For flexible NoSQL database solution
-- **Open Source Community**: For the amazing libraries and tools
-
----
-
-## 📞 Support
-
-If you encounter any issues or have questions:
-- Open an issue on [GitHub Issues](https://github.com/yourusername/STOCKBUDDY/issues)
-- Email: your.email@example.com
+- GitHub: [@yourusername](https://github.com/Himanshu8850)
+- LinkedIn: [Your LinkedIn](https://linkedin.com/in/Himanshu8850)
 
 ---
 

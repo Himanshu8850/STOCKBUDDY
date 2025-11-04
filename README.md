@@ -20,24 +20,28 @@
 ## 🌟 Features
 
 ### 📊 Paper Trading
+
 - **Virtual Trading Environment**: Practice stock trading with zero financial risk
 - **Real-time NSE Stock Data**: Live price updates from Indian stock market via Groww API
 - **Portfolio Management**: Buy and sell stocks with automatic profit/loss tracking
 - **Transaction History**: Track all-time and current P&L across your portfolio
 
 ### 🤖 AI-Powered Analysis
+
 - **Gemini AI Integration**: Advanced stock analysis powered by Google's Gemini 2.5 Pro
 - **Swing Trading Insights**: Get AI-generated pros, cons, and trading verdicts for portfolio stocks
 - **Automated Predictions**: Batch processing for analyzing multiple stocks simultaneously
 - **Smart Recommendations**: Actionable insights categorized as "Swing Buy", "Neutral", or "Avoid"
 
 ### 📈 Analytics & Monitoring
+
 - **Portfolio Analytics**: Comprehensive metrics including total value, P&L, holdings count
 - **Performance Tracking**: Real-time profit/loss calculations for individual stocks
 - **Market Alerts**: Stay updated with relevant market news and notifications
 - **Top Performers**: View market leaders and trending stocks
 
 ### 💻 Modern UI/UX
+
 - **Responsive Design**: Beautiful interface built with React and TailwindCSS
 - **Real-time Updates**: Auto-refresh portfolio data every 15 seconds
 - **Toast Notifications**: User-friendly success/error messages
@@ -48,6 +52,7 @@
 ## 🛠 Tech Stack
 
 ### Frontend
+
 - **React 18.3** - Modern UI library
 - **TailwindCSS** - Utility-first styling
 - **Chart.js & Recharts** - Data visualization
@@ -55,18 +60,21 @@
 - **React Modal** - Enhanced user interactions
 
 ### Backend
+
 - **Flask 2.3** - Lightweight Python web framework
 - **MongoDB & MongoEngine** - NoSQL database for portfolio persistence
 - **Flask-CORS** - Cross-origin resource sharing
 - **Requests** - HTTP library for external API calls
 
 ### AI & Data Processing
+
 - **Google Gemini 2.5 Pro** - Advanced language model for stock analysis
 - **NumPy & Pandas** - Data manipulation and analysis
 - **Scikit-learn** - Machine learning utilities
 - **TensorFlow & Keras** - Deep learning framework
 
 ### APIs & Integration
+
 - **Groww API** - Real-time Indian stock market data (NSE)
 - **Google Gemini API** - AI-powered stock predictions
 
@@ -87,12 +95,14 @@
 ### Installation
 
 1. **Clone the repository**
+
 ```bash
 git clone https://github.com/yourusername/STOCKBUDDY.git
 cd STOCKBUDDY
 ```
 
 2. **Backend Setup**
+
 ```bash
 # Navigate to backend directory
 cd backend
@@ -126,6 +136,7 @@ LOG_FILE=stockbuddy.log
 ```
 
 4. **Frontend Setup**
+
 ```bash
 # Return to root directory
 cd ..
@@ -135,6 +146,7 @@ npm install
 ```
 
 5. **Database Setup**
+
 ```bash
 # Start MongoDB (if running locally)
 mongod --dbpath /path/to/your/db
@@ -145,25 +157,30 @@ mongod --dbpath /path/to/your/db
 ### Running the Application
 
 **Option 1: Run both servers simultaneously**
+
 ```bash
 npm start
 ```
+
 This command uses `concurrently` to start both the Flask backend and React frontend.
 
 **Option 2: Run servers separately**
 
 Terminal 1 (Backend):
+
 ```bash
 cd backend
 python3 app.py
 ```
 
 Terminal 2 (Frontend):
+
 ```bash
 npm start
 ```
 
 The application will be available at:
+
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:5000
 
@@ -172,17 +189,20 @@ The application will be available at:
 ## 📖 Usage
 
 ### 1. **Search for Stocks**
+
 - Click the search icon (🔍) in the header
 - Enter stock symbol (e.g., "TCS", "INFY", "RELIANCE")
 - View real-time price and stock details
 
 ### 2. **Buy Stocks**
+
 - Search for a stock
 - Enter desired quantity
 - Click "Buy" to add to your portfolio
 - Transaction is recorded with current market price
 
 ### 3. **View Portfolio**
+
 - Navigate to "Portfolio" tab
 - See all your holdings with:
   - Current price and P&L
@@ -191,17 +211,20 @@ The application will be available at:
   - Total profit/loss
 
 ### 4. **Sell Stocks**
+
 - Click "Sell" on any stock card
 - Profit/loss is automatically calculated
 - Transaction is recorded in all-time P&L
 
 ### 5. **AI Analysis**
+
 - Navigate to "AI Predictions"
 - Click "Refresh Predictions" for latest insights
 - View AI-generated pros, cons, and trading verdict for each stock
 - Get swing trading recommendations (1-4 week horizon)
 
 ### 6. **Analytics Dashboard**
+
 - View total portfolio value
 - Track total and average P&L
 - Monitor number of holdings
@@ -214,12 +237,15 @@ The application will be available at:
 ### Stock Endpoints
 
 #### Search Stock
+
 ```http
 GET /api/searching?symbol={SYMBOL}
 ```
+
 Returns current price and market data for a stock.
 
 #### Buy Stock
+
 ```http
 POST /buy
 Content-Type: application/json
@@ -232,25 +258,31 @@ Content-Type: application/json
 ```
 
 #### Sell Stock
+
 ```http
 DELETE /api/sell?symbol={SYMBOL}&profit={PROFIT}
 ```
 
 #### Get Portfolio
+
 ```http
 GET /shares
 ```
+
 Returns all stocks in the user's portfolio.
 
 #### Get Profit/Loss
+
 ```http
 GET /api/profit
 ```
+
 Returns total all-time profit/loss.
 
 ### AI Endpoints
 
 #### Get AI Predictions
+
 ```http
 POST /api/ai-predictions
 Content-Type: application/json
@@ -261,6 +293,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "TCS": {
@@ -273,9 +306,11 @@ Content-Type: application/json
 ```
 
 ### Health Check
+
 ```http
 GET /health
 ```
+
 Returns server health status and database connectivity.
 
 ---
@@ -283,6 +318,7 @@ Returns server health status and database connectivity.
 ## 📊 Database Schema
 
 ### Share Collection
+
 ```javascript
 {
   symbol: String,      // NSE scrip code
@@ -293,6 +329,7 @@ Returns server health status and database connectivity.
 ```
 
 ### Profit Collection
+
 ```javascript
 {
   symbol: String,      // NSE scrip code
@@ -306,8 +343,9 @@ Returns server health status and database connectivity.
 ## 🎨 Color Theme
 
 The application uses a sophisticated color palette for optimal UX:
+
 - **Primary**: Light Green - Success and positive indicators
-- **Danger**: Red - Loss and negative indicators  
+- **Danger**: Red - Loss and negative indicators
 - **Info**: Blue - Neutral information and highlights
 - **Background**: Clean white with subtle gradients
 
@@ -326,10 +364,12 @@ The application uses a sophisticated color palette for optimal UX:
 ## 📝 Configuration
 
 ### Frontend Configuration (`package.json`)
+
 - Modify `start` script to change backend startup behavior
 - Adjust `proxy` settings for API endpoint routing
 
 ### Backend Configuration (`config.py`)
+
 - Development, Testing, and Production environments
 - Configurable logging levels
 - Database connection pooling settings
@@ -339,6 +379,7 @@ The application uses a sophisticated color palette for optimal UX:
 ## 🧪 Development
 
 ### Running Tests
+
 ```bash
 # Frontend tests
 npm test
@@ -349,6 +390,7 @@ pytest
 ```
 
 ### Building for Production
+
 ```bash
 # Create optimized production build
 npm run build
@@ -394,26 +436,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👨‍💻 Author
 
 **Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [Your LinkedIn](https://linkedin.com/in/yourprofile)
 
----
-
-## 🙏 Acknowledgments
-
-- **Groww**: For providing reliable Indian stock market data API
-- **Google Gemini**: For powering the AI analysis features
-- **Create React App**: For the excellent React boilerplate
-- **MongoDB**: For flexible NoSQL database solution
-- **Open Source Community**: For the amazing libraries and tools
-
----
-
-## 📞 Support
-
-If you encounter any issues or have questions:
-- Open an issue on [GitHub Issues](https://github.com/yourusername/STOCKBUDDY/issues)
-- Email: your.email@example.com
+- GitHub: [@yourusername](https://github.com/Himanshu8850)
+- LinkedIn: [Your LinkedIn](https://linkedin.com/in/Himanshu8850)
 
 ---
 

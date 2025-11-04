@@ -436,7 +436,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👨‍💻 Author
 
 **Your Name**
-
 - GitHub: [@yourusername](https://github.com/Himanshu8850)
 - LinkedIn: [Your LinkedIn](https://linkedin.com/in/Himanshu8850)
 

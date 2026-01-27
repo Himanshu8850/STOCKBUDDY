@@ -9,8 +9,8 @@ npm install --legacy-peer-deps
 echo "🏗️  Building React frontend..."
 CI=false npm run build
 
-echo "🐍 Installing Python dependencies..."
-pip install --upgrade pip
-pip install -r backend/requirements.txt
+echo "🐍 Installing Python dependencies (Python: $(python --version))..."
+python -m pip install --upgrade pip
+python -m pip install -r backend/requirements.txt
 
 echo "✅ Build complete! Ready to deploy."

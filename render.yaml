@@ -1,19 +1,13 @@
 services:
   - type: web
     name: stockbuddy
-    runtime: python
+    runtime: node
     buildCommand: "./build.sh"
     startCommand: "cd backend && gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 app:app"
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
-      - key: NODE_VERSION
-        value: 18.18.0
-      - key: PORT
-        value: 10000
-      - key: MONGO_URI
+      - key: MONGODB_URI
         sync: false
       - key: GEMINI_API_KEY
         sync: false
-      - key: FRONTEND_URL
+      - key: GEMINI_MODEL
         sync: false

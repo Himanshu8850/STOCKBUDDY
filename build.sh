@@ -4,10 +4,10 @@
 set -o errexit  # Exit on error
 
 echo "📦 Installing Node.js dependencies..."
-npm install
+npm install --legacy-peer-deps
 
 echo "🏗️  Building React frontend..."
-npm run build
+CI=false npm run build
 
 echo "🐍 Installing Python dependencies..."
 pip install --upgrade pip

@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_cors import CORS
 import os
 import sys
@@ -25,7 +25,11 @@ logger = logging.getLogger(__name__)
 from pymongo import MongoClient
 client = MongoClient(maxPoolSize=10, waitQueueTimeoutMS=5000)
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    static_folder=os.path.join(os.path.dirname(__file__), "../frontend/build"),
+    static_url_path="/",
+)
 
 # Configure CORS explicitly for frontend origin and API routes
 CORS(
@@ -42,6 +46,21 @@ app.config.from_object(config_class)
 # Register controllers
 ShareController.register(app)
 AIController.register(app)
+
+
+# Serve React build assets
+@app.route("/")
+def serve_root():
+    return send_from_directory(app.static_folder, "index.html")
+
+
+@app.route("/<path:path>")
+def serve_static(path):
+    # If asset exists, serve it; otherwise, fall back to index for SPA routing
+    full_path = os.path.join(app.static_folder, path)
+    if os.path.isfile(full_path):
+        return send_from_directory(app.static_folder, path)
+    return send_from_directory(app.static_folder, "index.html")
 
 if __name__ == '__main__':
     # Setup logging

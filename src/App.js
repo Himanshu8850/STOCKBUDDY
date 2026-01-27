@@ -17,6 +17,7 @@ import Alerts from "./Alerts";
 // import ChartComponent from "./Chart";
 import AnalyticsDisplay from "./AnalyticsDisplay";
 import { ToastContainer } from "./Toast";
+import Login from "./Login";
 
 function App() {
   const {
@@ -37,7 +38,25 @@ function App() {
   const [previousView, setPreviousView] = useState("dashboard");
   const [pred, setpred] = useState("");
   const [showSearchBar, setShowSearchBar] = useState(false);
+
+  // Simple client-side auth state
+  const [authUser, setAuthUser] = useState(() => {
+    const stored = localStorage.getItem("stockbuddy-user");
+    return stored ? JSON.parse(stored) : null;
+  });
+  const [demoMode, setDemoMode] = useState(() => {
+    const stored = localStorage.getItem("stockbuddy-user");
+    if (!stored) return false;
+    try {
+      const parsed = JSON.parse(stored);
+      return parsed?.mode === "demo";
+    } catch (err) {
+      return false;
+    }
+  });
   useEffect(() => {
+    if (!authUser || demoMode) return undefined;
+
     const fetchData = async () => {
       const share = localStorage.getItem("shares")
         ? JSON.parse(localStorage.getItem("shares")).map((s) => ({
@@ -45,17 +64,15 @@ function App() {
             price: parseFloat(s.price),
             quantity: parseInt(s.quantity, 10),
           }))
-        : []; // Initialize as empty array instead of 'a'
+        : [];
 
       let sh = localStorage.getItem("prof")
         ? parseFloat(JSON.parse(localStorage.getItem("prof")))
-        : 0; // Initialize as 0 instead of 'a'
+        : 0;
 
       if (isNaN(sh)) {
         sh = 0;
       }
-      // setProfit(sh); // Removed, profit will be set by fetchShares or fetchprof
-      // console.log("sh before storing in localStorage (initial load):", sh);
 
       if (share.length === 0) {
         const res = await fetchShares(
@@ -69,9 +86,6 @@ function App() {
         const rep = JSON.parse(res);
         setShares(rep);
         localStorage.setItem("shares", JSON.stringify(rep));
-        // console.log("profit before storing in localStorage (after fetchShares):", profit);
-        // localStorage.setItem("prof", JSON.stringify(profit)); // Redundant, fetchShares already does this
-        // setProfit(sh); // This was overwriting the correct profit state
         fetchprof(setProfit, setShares, setProfitnow, rep);
         setLoading(false);
       } else {
@@ -81,12 +95,7 @@ function App() {
               price: parseFloat(s.price),
               quantity: parseInt(s.quantity, 10),
             }))
-          : []; // Initialize as empty array instead of 'a'
-        // console.log(
-        //   "profit before storing in localStorage (else branch):",
-        //   profit
-        // );
-        // localStorage.setItem("prof", JSON.stringify(profit)); // Redundant if fetchprof handles it
+          : [];
         fetchprof(setProfit, setShares, setProfitnow, shar);
       }
     };
@@ -94,7 +103,58 @@ function App() {
     fetchData();
     const interval = setInterval(fetchData, 15000);
     return () => clearInterval(interval);
-  }, []);
+  }, [authUser, demoMode]);
+
+  // Demo data hydration
+  useEffect(() => {
+    if (!demoMode) return;
+    const demoShares = [
+      { symbol: "AAPL", price: 182, quantity: 6, prr: [5400, 190] },
+      { symbol: "MSFT", price: 410, quantity: 3, prr: [3600, 350] },
+      { symbol: "TSLA", price: 245, quantity: 4, prr: [1200, 260] },
+    ];
+    const demoProfit = 10200;
+    const demoProfitNow = demoShares.reduce((acc, s) => acc + s.prr[0], 0);
+    setShares(demoShares);
+    setProfit(demoProfit);
+    setProfitnow(demoProfitNow);
+    localStorage.setItem("shares", JSON.stringify(demoShares));
+    localStorage.setItem("prof", JSON.stringify(demoProfit));
+  }, [demoMode, setProfit, setProfitnow, setShares]);
+
+  const handleLogin = ({ email, password }) => {
+    if (!email || !password) return;
+    const user = {
+      email,
+      name: email.split("@")[0] || "User",
+      mode: "standard",
+    };
+    setAuthUser(user);
+    setDemoMode(false);
+    localStorage.setItem("stockbuddy-user", JSON.stringify(user));
+  };
+
+  const handleDemoAccess = () => {
+    const user = {
+      email: "demo@stockbuddy.ai",
+      name: "Demo User",
+      mode: "demo",
+    };
+    setAuthUser(user);
+    setDemoMode(true);
+    localStorage.setItem("stockbuddy-user", JSON.stringify(user));
+  };
+
+  const handleLogout = () => {
+    setAuthUser(null);
+    setDemoMode(false);
+    setShares([]);
+    setProfit(0);
+    setProfitnow(0);
+    localStorage.removeItem("stockbuddy-user");
+    localStorage.removeItem("shares");
+    localStorage.removeItem("prof");
+  };
 
   // Fetch Gemini AI predictions for all stocks in portfolio
   const fetchAIPredictions = async () => {
@@ -172,6 +232,20 @@ function App() {
               ← Back
             </button>
           )}
+
+          {/* User Chip */}
+          {authUser && (
+            <div className="user-chip">
+              <div className="user-meta">
+                <span className="user-name">{authUser.name}</span>
+                <span className="user-email">{authUser.email}</span>
+              </div>
+              {demoMode && <span className="user-pill">Demo</span>}
+              <button className="logout-btn" onClick={handleLogout}>
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>
@@ -192,6 +266,30 @@ function App() {
             </span>
             <span className="label">{profitnow >= 0 ? "Profit" : "Loss"}</span>
           </div>
+        </div>
+
+        {/* New Portfolio Card */}
+        <div
+          className="profit-card portfolio-card-animated"
+          id="my-portfolio-card"
+          onClick={() => navigateTo("portfolio")}
+        >
+          <div className="card-header">
+            <span className="card-icon">
+              <StockIcon />
+            </span>
+            <h3>My Portfolio</h3>
+          </div>
+          <div className="card-value">
+            <span className="amount">{shares ? shares.length : 0}</span>
+            <span className="label">Holdings</span>
+          </div>
+          <button
+            className="see-more-indicator"
+            onClick={() => navigateTo("portfolio")}
+          >
+            SEE MORE
+          </button>
         </div>
 
         <div className="profit-card alltime-profit">
@@ -251,7 +349,7 @@ function App() {
         return (
           <div className="view-container">
             <h2 className="view-title">
-              <span className="title-icon">📊</span>
+              <span className="title-icon"></span>
               My Portfolio
             </h2>
             <Stocks />
@@ -262,7 +360,7 @@ function App() {
         return (
           <div className="view-container">
             <h2 className="view-title">
-              <span className="title-icon">🚀</span>
+              <span className="title-icon"></span>
               Top Performers
             </h2>
             <IndexRatios />
@@ -273,7 +371,7 @@ function App() {
         return (
           <div className="view-container">
             <h2 className="view-title">
-              <span className="title-icon">🔔</span>
+              <span className="title-icon"></span>
               Market Alerts
             </h2>
             <Alerts />
@@ -286,7 +384,7 @@ function App() {
         return (
           <div className="view-container">
             <h2 className="view-title">
-              <span className="title-icon">🤖</span>
+              <span className="title-icon"></span>
               AI Predictions
             </h2>
 
@@ -420,7 +518,7 @@ function App() {
         return (
           <div className="view-container">
             <h2 className="view-title">
-              <span className="title-icon">📈</span>
+              <span className="title-icon"></span>
               Portfolio Analytics
             </h2>
             <AnalyticsDisplay shares={shares} />
@@ -432,11 +530,19 @@ function App() {
     }
   };
 
+  if (!authUser) {
+    return (
+      <div className="app login-shell">
+        <Login onLogin={handleLogin} onDemo={handleDemoAccess} />
+        <ToastContainer toasts={toasts} removeToast={removeToast} />
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       {renderHeader()}
       <main className="app-main">{renderCurrentView()}</main>
-      {/* Toast Container for notifications */}
       <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   );

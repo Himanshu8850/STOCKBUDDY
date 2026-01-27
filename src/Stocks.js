@@ -78,7 +78,7 @@ const Stocks = () => {
           <>
             {!shares || shares.length === 0 ? (
               <div className="empty-state">
-                <div className="empty-icon">📈</div>
+                <div className="empty-icon"></div>
                 <h3>No Shares in Portfolio</h3>
                 <p>Start investing by searching and buying your first stock!</p>
               </div>
@@ -105,9 +105,7 @@ const Stocks = () => {
                           className={`change-indicator ${
                             profitAmount >= 0 ? "positive" : "negative"
                           }`}
-                        >
-                          {profitAmount >= 0 ? "+" : "-"}
-                        </div>
+                        ></div>
                       </div>
 
                       <div className="card-content">

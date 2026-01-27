@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState, React } from "react"; // Added React import if not globally available
 import { MyContext } from "./context";
+import API_BASE_URL from './config';
 import { fetchShares } from "./functions";
 
 const Stocks = () => {
@@ -18,7 +19,7 @@ const Stocks = () => {
     setDisabled(true);
     try {
       const res = await fetch(
-        `http://localhost:5000/api/sell?symbol=${symbol}&profit=${profit}`,
+        `${API_BASE_URL}/api/sell?symbol=${symbol}&profit=${profit}`,
         {
           method: "DELETE",
           headers: {

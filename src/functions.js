@@ -1,4 +1,5 @@
 // const { set } = require("mongoose");
+import API_BASE_URL from './config';
 
 const fetchShares = async (
   setShares,
@@ -10,7 +11,7 @@ const fetchShares = async (
   try {
     console.log("fetchshares");
 
-    const response = await fetch("http://localhost:5000/shares", {
+    const response = await fetch(`${API_BASE_URL}/shares`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -33,7 +34,7 @@ const fetchShares = async (
         return { ...share, prr };
       })
     );
-    const oldprof = await fetch("http://localhost:5000/api/profit");
+    const oldprof = await fetch(`${API_BASE_URL}/api/profit`);
     const oldprofval = await oldprof.json();
     setProfitnow(tot);
     localStorage.setItem("prof", JSON.stringify(oldprofval.profit));
@@ -55,7 +56,7 @@ const calculateProfit = async (symbol, pri, qtt) => {
   try {
     // console.log("calsymb", symbol);
     const response = await fetch(
-      `http://localhost:5000/api/searching?symbol=${symbol}`,
+      `${API_BASE_URL}/api/searching?symbol=${symbol}`,
       {
         method: "GET",
         headers: {
@@ -99,7 +100,7 @@ const fetchprof = async (setProfit, setShares, setProfitnow, shares) => {
   setShares(shareslist);
   localStorage.setItem("shares", JSON.stringify(shareslist));
 
-  const oldprof = await fetch("http://localhost:5000/api/profit");
+  const oldprof = await fetch(`${API_BASE_URL}/api/profit`);
   const oldprofval = await oldprof.json();
   setProfit(oldprofval.profit); // Update the main profit state
 };

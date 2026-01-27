@@ -27,14 +27,20 @@ client = MongoClient(maxPoolSize=10, waitQueueTimeoutMS=5000)
 
 app = Flask(
     __name__,
-    static_folder=os.path.join(os.path.dirname(__file__), "../frontend/build"),
-    static_url_path="/",
+    static_folder=os.path.join(os.path.dirname(__file__), "../build"),
+    static_url_path="",
 )
 
 # Configure CORS explicitly for frontend origin and API routes
+allowed_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:37839",
+    os.getenv("FRONTEND_URL", "*")  # Production URL from environment
+]
 CORS(
     app,
-    resources={r"/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:37839"]}},
+    resources={r"/*": {"origins": allowed_origins}},
     methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
 )
@@ -49,17 +55,18 @@ AIController.register(app)
 
 
 # Serve React build assets
-@app.route("/")
-def serve_root():
-    return send_from_directory(app.static_folder, "index.html")
-
-
+@app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve_static(path):
-    # If asset exists, serve it; otherwise, fall back to index for SPA routing
-    full_path = os.path.join(app.static_folder, path)
-    if os.path.isfile(full_path):
+    # Serve API routes first (they're registered above)
+    if path.startswith("api/") or path.startswith("shares"):
+        return app.send_static_file("index.html")  # This won't execute; API routes handled above
+    
+    # Check if file exists in build folder
+    if path and os.path.isfile(os.path.join(app.static_folder, path)):
         return send_from_directory(app.static_folder, path)
+    
+    # For all other routes, serve index.html (SPA routing)
     return send_from_directory(app.static_folder, "index.html")
 
 if __name__ == '__main__':

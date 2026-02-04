@@ -18,6 +18,7 @@ import Alerts from "./Alerts";
 import AnalyticsDisplay from "./AnalyticsDisplay";
 import { ToastContainer } from "./Toast";
 import Login from "./Login";
+import API_BASE_URL from './config';
 
 function App() {
   const {
@@ -165,7 +166,7 @@ function App() {
     setpred("Loading AI predictions...");
     try {
       const symbols = shares.map((s) => s.symbol);
-      const res = await fetch("http://localhost:5000/api/ai-predictions", {
+      const res = await fetch(`${API_BASE_URL}/api/ai-predictions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stocks: symbols }),

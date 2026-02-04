@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import React from "react";
 import { MyContext } from "./context";
+import API_BASE_URL from './config';
 import { SearchIcon, MoneyIcon } from "./icons";
 import { fetchShares } from "./functions";
 const Search = ({ onClose }) => {
@@ -28,7 +29,7 @@ const Search = ({ onClose }) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:5000/api/searching?symbol=${text}`
+        `${API_BASE_URL}/api/searching?symbol=${text}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -62,7 +63,7 @@ const Search = ({ onClose }) => {
       showWarningToast("Please specify quantity before buying");
     } else {
       try {
-        const response = await fetch("http://localhost:5000/buy", {
+        const response = await fetch(`${API_BASE_URL}/buy`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
